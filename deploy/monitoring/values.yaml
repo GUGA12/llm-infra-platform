@@ -1,0 +1,24 @@
+# kube-prometheus-stack 的 values 覆盖(只写与默认不同的部分)
+grafana:
+  adminPassword: "changeme"        # TODO(你来改): 阶段7换成 SealedSecret,先能用
+  sidecar:
+    dashboards: {enabled: true, searchNamespace: ALL}   # 让 ConfigMap 形式的面板自动加载
+prometheus:
+  prometheusSpec:
+    retention: 7d                  # 问题: 单机磁盘有限,保留期和磁盘怎么估算?
+    # 关键: 默认只发现带 release 标签的 ServiceMonitor,以下两行放开限制
+    serviceMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+alertmanager:
+  config:
+    route:
+      receiver: "default"
+      group_by: [alertname, namespace]
+      routes:
+        - matchers: [severity="critical"]
+          receiver: im-critical    # TODO(你来改): 接钉钉/飞书 webhook
+    receivers:
+      - name: default
+      - name: im-critical
+        webhook_configs:
+          - url: "http://TODO-your-webhook"   # TODO(你来改)

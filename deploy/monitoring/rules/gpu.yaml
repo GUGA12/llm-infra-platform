@@ -1,0 +1,24 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata: {name: gpu-rules, namespace: monitoring}
+spec:
+  groups:
+    - name: gpu.rules
+      rules:
+        - alert: GPUHighTemperature
+          expr: DCGM_FI_DEV_GPU_TEMP > 83          # TODO(你来改): 查你显卡型号的降频温度阈值
+          for: 5m
+          labels: {severity: warning}
+          annotations:
+            summary: "GPU {{ $labels.gpu }} 温度 {{ $value }}C"
+            runbook: "docs/runbook/gpu-temp.md"     # 每条告警配一篇处置文档
+        - alert: DCGMExporterAbsent
+          expr: absent(DCGM_FI_DEV_GPU_UTIL)       # 问题: 为什么监控采集器本身也要被监控?
+          for: 5m
+          labels: {severity: critical}
+    - name: vllm.rules
+      rules:
+        - alert: VLLMQueueBacklog
+          expr: sum(vllm:num_requests_waiting) > 20   # TODO(你来改): 压测后用真实容量反推阈值
+          for: 3m
+          labels: {severity: warning}

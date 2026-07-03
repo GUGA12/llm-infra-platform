@@ -1,0 +1,5 @@
+apiVersion: v2
+name: chat-api
+description: 自研 RAG Chat 服务(全项目唯一从零写的 chart,必须每行都能讲)
+version: 0.1.0
+appVersion: "0.1.0"

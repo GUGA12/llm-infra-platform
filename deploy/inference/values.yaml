@@ -1,0 +1,28 @@
+# vllm production-stack 的 values(先小模型打通,再换 7B)
+servingEngineSpec:
+  runtimeClassName: ""             # TODO(你来改): k3s+GPU Operator 通常填 "nvidia";怎么确认?kubectl get runtimeclass
+  modelSpec:
+    - name: "opt125m"              # 第一步: 先用这个 250MB 小模型打通全链路
+      repository: "vllm/vllm-openai"
+      tag: "v0.10.2"               # TODO(你来改): 固定当前稳定版,禁止 latest。问题: 为什么?
+      modelURL: "facebook/opt-125m"
+      replicaCount: 1
+      requestCPU: 4
+      requestMemory: "8Gi"
+      requestGPU: 1
+      pvcStorage: "20Gi"           # 权重缓存: Pod 重启不重新下载。问题: 没有 PVC 时扩容为什么慢?
+    # 第二步(打通后取消注释,注释掉上面):
+    # - name: "qwen25-7b"
+    #   repository: "vllm/vllm-openai"
+    #   tag: "v0.10.2"
+    #   modelURL: "Qwen/Qwen2.5-7B-Instruct-AWQ"
+    #   replicaCount: 1
+    #   requestCPU: 6
+    #   requestMemory: "20Gi"
+    #   requestGPU: 1
+    #   pvcStorage: "60Gi"
+    #   vllmConfig:
+    #     gpuMemoryUtilization: 0.92   # 问题: 调到 0.99 会发生什么?(这是故障演练#1)
+    #     maxModelLen: 8192
+routerSpec:
+  enabled: true

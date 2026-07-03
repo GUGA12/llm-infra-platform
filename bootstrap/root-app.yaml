@@ -1,0 +1,16 @@
+# Argo CD App-of-Apps 根应用:装好 Argo 后 kubectl apply 这一个文件,其余全自动
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改): 你的仓库地址
+    targetRevision: main
+    path: argocd/apps
+  destination:
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}   # 问题: prune/selfHeal 分别干什么?删掉会怎样?

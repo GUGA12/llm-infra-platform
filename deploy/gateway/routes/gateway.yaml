@@ -1,0 +1,12 @@
+# Gateway API 入口(kind 循环里就能验证,不需要 GPU)
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata: {name: llm-gw, namespace: gateway}
+spec:
+  gatewayClassName: eg               # Envoy Gateway 安装后提供的 class
+  listeners:
+    - name: http
+      port: 80
+      protocol: HTTP                 # TODO(阶段5): 加 HTTPS listener + cert-manager 证书引用
+      allowedRoutes:
+        namespaces: {from: All}      # 问题: 生产里为什么通常不用 All?

@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: inference
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "20"
+spec:
+  project: default
+  sources:
+    - repoURL: https://vllm-project.github.io/production-stack
+      chart: vllm-stack
+      targetRevision: "*"                # TODO(你来改): 固定版本号,理由写在 PR 里
+      helm:
+        valueFiles: [$values/deploy/inference/values.yaml]
+    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+      targetRevision: main
+      ref: values
+  destination: {server: https://kubernetes.default.svc, namespace: inference}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true]

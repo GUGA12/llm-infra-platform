@@ -1,0 +1,14 @@
+name: lint
+on: [push, pull_request]
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+      - name: helm lint 自研chart
+        run: helm lint deploy/apps/chat-api
+      - name: kubeconform 校验K8s清单
+        run: |
+          go install github.com/yannh/kubeconform/cmd/kubeconform@latest
+          find deploy -name '*.yaml' ! -name 'values*.yaml' -print0 | xargs -0 $HOME/go/bin/kubeconform -ignore-missing-schemas -summary

@@ -1,0 +1,16 @@
+image:
+  repository: ghcr.io/YOUR_NAME/chat-api   # TODO(你来改)
+  tag: "0.1.0"                             # CI 会自动 bump 这一行
+replicaCount: 2
+resources:
+  requests: {cpu: 250m, memory: 256Mi}
+  limits: {cpu: "1", memory: 512Mi}        # 问题: limits 设太低会看到什么现象?(OOMKilled/节流)
+env:
+  VLLM_BASE_URL: http://vllm-router-service.inference:80/v1
+  REDIS_URL: redis://redis-master.data:6379/0
+  PG_DSN: postgresql://TODO                # TODO(你来改): 阶段7换 Secret 引用
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 5
+  targetCPU: 70

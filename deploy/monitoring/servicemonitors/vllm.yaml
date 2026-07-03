@@ -1,0 +1,14 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: vllm
+  namespace: monitoring
+spec:
+  namespaceSelector: {matchNames: [inference]}
+  selector:
+    matchLabels:
+      environment: router          # TODO(验证): 以 production-stack 实际打的标签为准
+  endpoints:
+    - port: router-sport
+      path: /metrics
+      interval: 15s
