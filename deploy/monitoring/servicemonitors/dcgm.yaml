@@ -1,4 +1,4 @@
-# 让 Prometheus 抓 DCGM Exporter(GPU Operator 装好后才有这个 Service)
+# [监控层|B类] 抓 DCGM Exporter(GPU指标)。GPU阶段才有目标,kind里它会是0 target,不算错
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -6,10 +6,10 @@ metadata:
   namespace: monitoring
 spec:
   namespaceSelector:
-    matchNames: [gpu-operator]     # 问题: 为什么要跨 namespace 选择?
+    matchNames: [gpu-operator]
   selector:
     matchLabels:
-      app: nvidia-dcgm-exporter    # TODO(验证): kubectl get svc -n gpu-operator --show-labels 核对真实标签
+      app: __TODO__                  # TODO(验证): kubectl get svc -n gpu-operator --show-labels
   endpoints:
-    - port: gpu-metrics            # TODO(验证): 端口名以实际 Service 为准(9400)
+    - port: __TODO__                 # TODO(验证): 端口"名"不是数字; kubectl get svc ... -o yaml 看 ports[].name
       interval: 15s

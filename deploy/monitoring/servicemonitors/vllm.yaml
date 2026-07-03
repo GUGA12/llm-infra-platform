@@ -1,3 +1,4 @@
+# [监控层|B类] 抓 vLLM Router+Engine 指标(kind循环里目标是mock,同样能验证发现机制)
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -6,9 +7,8 @@ metadata:
 spec:
   namespaceSelector: {matchNames: [inference]}
   selector:
-    matchLabels:
-      environment: router          # TODO(验证): 以 production-stack 实际打的标签为准
+    matchLabels: {__TODO__: __TODO__}   # TODO(验证): production-stack给Service打的真实标签
   endpoints:
-    - port: router-sport
+    - port: __TODO__
       path: /metrics
       interval: 15s

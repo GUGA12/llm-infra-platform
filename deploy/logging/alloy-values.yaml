@@ -1,0 +1,13 @@
+# [日志层|A类] Alloy DaemonSet 采集全集群容器stdout -> Loki
+alloy:
+  configMap:
+    content: |
+      discovery.kubernetes "pods" { role = "pod" }
+      loki.source.kubernetes "pods" {
+        targets    = discovery.kubernetes.pods.targets
+        forward_to = [loki.write.default.receiver]
+      }
+      loki.write "default" {
+        endpoint { url = "http://__TODO__.logging.svc:3100/loki/api/v1/push" }
+        # TODO(验证): 装完loki后 kubectl get svc -n logging 填真实svc名
+      }

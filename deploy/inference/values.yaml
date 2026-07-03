@@ -1,28 +1,31 @@
-# vllm production-stack 的 values(先小模型打通,再换 7B)
+# [推理层|A类] vLLM production-stack
+# 先小模型打通(第一块), 再切7B(第二块)。切换=注释开关,两块都要填
 servingEngineSpec:
-  runtimeClassName: ""             # TODO(你来改): k3s+GPU Operator 通常填 "nvidia";怎么确认?kubectl get runtimeclass
+  runtimeClassName: __TODO__         # ""还是"nvidia"? 用 kubectl get runtimeclass 判断; kind里填什么?
   modelSpec:
-    - name: "opt125m"              # 第一步: 先用这个 250MB 小模型打通全链路
+    - name: "opt125m"
       repository: "vllm/vllm-openai"
-      tag: "v0.10.2"               # TODO(你来改): 固定当前稳定版,禁止 latest。问题: 为什么?
+      tag: __TODO__                  # 固定版本! 去该镜像tags页选当前稳定版, 记录选择理由
       modelURL: "facebook/opt-125m"
       replicaCount: 1
-      requestCPU: 4
-      requestMemory: "8Gi"
+      requestCPU: __TODO__
+      requestMemory: __TODO__
       requestGPU: 1
-      pvcStorage: "20Gi"           # 权重缓存: Pod 重启不重新下载。问题: 没有 PVC 时扩容为什么慢?
-    # 第二步(打通后取消注释,注释掉上面):
+      pvcStorage: __TODO__           # 权重缓存; opt-125m很小, 但PVC还要装什么?(HF缓存结构)
+    # ---- 7B 块(打通后启用) ----
     # - name: "qwen25-7b"
     #   repository: "vllm/vllm-openai"
-    #   tag: "v0.10.2"
-    #   modelURL: "Qwen/Qwen2.5-7B-Instruct-AWQ"
+    #   tag: __TODO__                # 与上面同版本
+    #   modelURL: __TODO__           # 选AWQ量化版还是原版? 依据: 你的显存是多少
     #   replicaCount: 1
-    #   requestCPU: 6
-    #   requestMemory: "20Gi"
+    #   requestCPU: __TODO__
+    #   requestMemory: __TODO__      # 依据: 权重加载时的宿主内存峰值, 不是显存
     #   requestGPU: 1
-    #   pvcStorage: "60Gi"
+    #   pvcStorage: __TODO__         # 依据: 模型文件大小x余量
     #   vllmConfig:
-    #     gpuMemoryUtilization: 0.92   # 问题: 调到 0.99 会发生什么?(这是故障演练#1)
-    #     maxModelLen: 8192
+    #     gpuMemoryUtilization: __TODO__   # 0.9~0.95; 调0.99会怎样(演练#1)
+    #     maxModelLen: __TODO__            # 上下文越长KV cache越吃显存, 和并发怎么权衡?
 routerSpec:
   enabled: true
+  resources:
+    requests: {cpu: __TODO__, memory: __TODO__}

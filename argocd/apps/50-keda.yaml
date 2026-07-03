@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: keda
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "50"}
+spec:
+  project: default
+  sources:
+    - repoURL: https://kedacore.github.io/charts
+      chart: keda
+      targetRevision: "2.16.1"         # TODO(你来改)
+    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+      targetRevision: main
+      path: deploy/inference            # ScaledObject 跟随 KEDA 一起同步
+      directory: {include: "keda-scaledobject.yaml"}
+  destination: {server: https://kubernetes.default.svc, namespace: keda}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true]

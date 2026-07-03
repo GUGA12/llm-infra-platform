@@ -1,0 +1,18 @@
+# [本地环境层] kind 集群定义 —— 环境即代码
+kind: Cluster
+apiVersion: kind.x-k8s.io/v1alpha4
+nodes:
+  - role: control-plane
+    kubeadmConfigPatches:
+      - |
+        kind: InitConfiguration
+        nodeRegistration:
+          kubeletExtraArgs:
+            node-labels: "ingress-ready=true"
+    extraPortMappings:            # 把宿主机端口映射进节点容器,给网关用
+      - containerPort: 80
+        hostPort: __TODO__        # 80 被占就换 8080; 用什么命令确认被谁占?
+        protocol: TCP
+      - containerPort: 443
+        hostPort: __TODO__
+        protocol: TCP

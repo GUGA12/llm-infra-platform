@@ -1,0 +1,9 @@
+# [数据层|A类] Milvus standalone(资源紧张可整体不装,改用pgvector,在30-apps里同步注释)
+mode: standalone
+cluster: {enabled: false}
+etcd: {replicaCount: 1}
+minio: {mode: standalone}
+standalone:
+  persistence: {persistentVolumeClaim: {size: __TODO__}}
+  resources:
+    requests: {cpu: __TODO__, memory: __TODO__}   # Milvus吃内存,笔记本上给多少?给不起怎么办?

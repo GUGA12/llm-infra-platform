@@ -1,0 +1,22 @@
+# [网关层|B类] Token级限流: 计数来源=AIGatewayRoute的llmRequestCosts
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: BackendTrafficPolicy
+metadata: {name: token-ratelimit, namespace: gateway}
+spec:
+  targetRefs:
+    - group: aigateway.envoyproxy.io
+      kind: AIGatewayRoute
+      name: llm-route
+  rateLimit:
+    type: Global                     # Global需要Envoy Gateway配Redis后端(装EG时的values里指到data的redis)
+    global:
+      rules:
+        - clientSelectors:
+            - headers: [{name: __TODO__, type: Distinct}]   # 按什么维度限? 谁负责注入这个header?
+          limit:
+            requests: __TODO__       # 这里的"requests"计的是token成本; 每小时给多少? 写估算过程
+            unit: __TODO__
+          cost:
+            response:
+              from: Metadata
+              metadata: {namespace: io.envoy.ai_gateway, key: llm_total_tokens}

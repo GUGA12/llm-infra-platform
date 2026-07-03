@@ -1,0 +1,24 @@
+# [业务层|A类] Dify社区chart values骨架
+# 重要: 字段名随所选chart不同! 本文件是"配置检查单", 选定chart后逐项对照其README改键名
+# TODO(决策): 选哪个chart? 候选: borispolonsky/dify-helm 等; 写下选择理由(维护活跃度/star/最近提交)
+global:
+  host: __TODO__                     # 访问域名
+# 1) 外部PostgreSQL: 必须禁用内置, 指向data命名空间(为什么不用chart内置的?)
+externalPostgres:
+  enabled: true
+  host: __TODO__.data.svc
+  port: 5432
+  database: __TODO__                 # 与postgresql-values.yaml一致
+  username: __TODO__
+  password: __TODO__
+# 2) 外部Redis
+externalRedis:
+  enabled: true
+  host: __TODO__.data.svc
+  port: 6379
+# 3) 向量库
+vectorDB:
+  type: __TODO__                     # milvus还是pgvector? 与你数据层决策一致
+  host: __TODO__
+# 4) 模型供应商在Dify界面里配: OpenAI-API-compatible,
+#    base_url = http://vllm-router-service.inference/v1  (kind循环即mock)

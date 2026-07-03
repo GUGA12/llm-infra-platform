@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gpu-operator
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "0"}
+spec:
+  project: default
+  sources:
+    - repoURL: https://helm.ngc.nvidia.com/nvidia
+      chart: gpu-operator
+      targetRevision: "v25.3.0"        # TODO(你来改): 查最新稳定版并固定
+      helm:
+        valueFiles: [$values/deploy/gpu-operator/values.yaml]
+    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+      targetRevision: main
+      ref: values
+  destination: {server: https://kubernetes.default.svc, namespace: gpu-operator}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true, ServerSideApply=true]

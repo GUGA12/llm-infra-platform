@@ -1,0 +1,16 @@
+# [GPU层|A类] NVIDIA GPU Operator
+driver:
+  enabled: __TODO__                  # 机器已有驱动(nvidia-smi有输出)填false; 判断依据写这
+toolkit: {enabled: true}
+devicePlugin:
+  enabled: true
+  # ---- 单卡多副本演示(阶段6可选): time-slicing ----
+  # config:
+  #   name: time-slicing-config      # 需另建同名ConfigMap声明replicas=__TODO__
+  #   default: any
+dcgmExporter:
+  enabled: true
+  serviceMonitor: {enabled: false}   # 关掉内置SM: 我们在monitoring里统一自管(见dcgm.yaml)。利弊各一句?
+gfd: {enabled: true}                 # 自动打显卡型号/显存标签, 供nodeSelector用
+mig:
+  strategy: __TODO__                 # single/mixed/none; 你的卡支持MIG吗? 怎么查?

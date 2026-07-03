@@ -1,12 +1,23 @@
-# Gateway API 入口(kind 循环里就能验证,不需要 GPU)
+# [网关层|B类] 集群流量总入口
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
 metadata: {name: llm-gw, namespace: gateway}
 spec:
-  gatewayClassName: eg               # Envoy Gateway 安装后提供的 class
+  gatewayClassName: __TODO__         # TODO(验证): 装完Envoy Gateway后 kubectl get gatewayclass
   listeners:
     - name: http
       port: 80
-      protocol: HTTP                 # TODO(阶段5): 加 HTTPS listener + cert-manager 证书引用
+      protocol: HTTP
       allowedRoutes:
-        namespaces: {from: All}      # 问题: 生产里为什么通常不用 All?
+        namespaces:
+          from: __TODO__             # All/Same/Selector; 生产为什么少用All? 你选哪个并说明
+    # ---- 阶段5启用HTTPS ----
+    # - name: https
+    #   port: 443
+    #   protocol: HTTPS
+    #   tls:
+    #     mode: Terminate
+    #     certificateRefs:
+    #       - name: __TODO__         # cert-manager签发的Secret名
+    #   allowedRoutes:
+    #     namespaces: {from: __TODO__}

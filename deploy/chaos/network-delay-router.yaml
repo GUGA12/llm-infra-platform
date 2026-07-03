@@ -1,0 +1,15 @@
+# [演练|B类] 故障#10: router->engine注入延迟, 练"分层定位"
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata: {name: delay-router-to-vllm, namespace: chaos-mesh}
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces: [inference]
+    labelSelectors: {__TODO__: __TODO__}
+  delay:
+    latency: __TODO__                # 多大延迟能在TTFT面板上肉眼可见又不至于全超时?
+    jitter: __TODO__
+  direction: to
+  duration: __TODO__                 # 为什么演练要设时限而pod-kill不设?

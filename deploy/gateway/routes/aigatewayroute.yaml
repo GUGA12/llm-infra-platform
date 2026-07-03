@@ -1,0 +1,25 @@
+# [网关层|B类] AI路由: 按model分流 + 声明token计费来源
+# 注意: v1alpha1快速迭代, 装完后以 kubectl explain aigatewayroute.spec 为准修正字段
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIGatewayRoute
+metadata: {name: llm-route, namespace: gateway}
+spec:
+  parentRefs: [{name: llm-gw}]
+  apiSchema: {name: OpenAI}
+  rules:
+    - matches:
+        - headers: [{name: x-ai-eg-model, value: __TODO__}]   # 与你modelSpec里的模型名对齐
+      backendRefs: [{name: vllm-backend}]
+  llmRequestCosts:
+    - metadataKey: llm_total_tokens
+      type: __TODO__                 # InputToken/OutputToken/TotalToken; 限流该按哪个? 为什么?
+---
+apiVersion: aigateway.envoyproxy.io/v1alpha1
+kind: AIServiceBackend
+metadata: {name: vllm-backend, namespace: gateway}
+spec:
+  schema: {name: OpenAI}
+  backendRef:
+    name: __TODO__
+    namespace: inference
+    port: __TODO__

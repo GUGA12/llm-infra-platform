@@ -1,0 +1,11 @@
+# [演练|B类] 故障#3: 杀一个推理Pod, 验证摘除+自愈。kind循环可先拿mock练同款
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata: {name: kill-one-vllm, namespace: chaos-mesh}
+spec:
+  action: pod-kill
+  mode: __TODO__                     # one/all/fixed-percent; 演练该选哪个? 选all会怎样
+  selector:
+    namespaces: [inference]
+    labelSelectors:
+      __TODO__: __TODO__             # TODO(验证): kubectl get pod -n inference --show-labels

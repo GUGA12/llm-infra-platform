@@ -1,0 +1,8 @@
+# [数据层|A类] Redis: 会话缓存 + (阶段5)网关全局限流计数器
+architecture: __TODO__               # standalone/replication; 学习环境选哪个?限流计数器丢了会怎样?
+auth:
+  enabled: __TODO__                  # 关=省事,开=多一步Secret; 写下你的取舍
+master:
+  persistence: {size: __TODO__}
+  resources:
+    requests: {cpu: __TODO__, memory: __TODO__}

@@ -1,0 +1,3 @@
+deploy/gateway/routes/secret-api-keys.yaml
+*.local.yaml
+.DS_Store

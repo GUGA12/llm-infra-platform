@@ -1,0 +1,20 @@
+# [日志层|A类] Loki 单二进制形态(学习环境)。问题: 生产为何用SimpleScalable?
+deploymentMode: SingleBinary
+loki:
+  auth_enabled: false
+  commonConfig: {replication_factor: 1}
+  storage: {type: filesystem}
+  schemaConfig:
+    configs:
+      - from: "2024-01-01"
+        store: tsdb
+        object_store: filesystem
+        schema: v13
+        index: {prefix: index_, period: 24h}
+  limits_config:
+    retention_period: __TODO__       # 日志留多久? 依据与指标retention一致的思路
+singleBinary:
+  replicas: 1
+  persistence:
+    enabled: __TODO__                # 不开=Pod重启日志全丢, 演练复盘还能做吗?
+    size: __TODO__

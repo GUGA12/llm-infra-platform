@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: apps
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "30"}
+spec:
+  project: default
+  sources:
+    # 自研 chat-api: chart 在本仓库
+    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+      targetRevision: main
+      path: deploy/apps/chat-api
+      helm: {releaseName: chat-api}
+    # Dify: 社区 Helm chart。TODO(你来改): 选定 chart 来源(如 borispolonsky/dify-helm)后填 repoURL/chart/版本
+    # - repoURL: TODO
+    #   chart: dify
+    #   targetRevision: TODO
+    #   helm: {valueFiles: [$values/deploy/apps/dify/values.yaml]}
+  destination: {server: https://kubernetes.default.svc, namespace: apps}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true]

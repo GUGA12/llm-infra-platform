@@ -1,3 +1,4 @@
+# [监控层|E类] GPU 告警。阈值=参数,由你定;表达式结构我给全
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
 metadata: {name: gpu-rules, namespace: monitoring}
@@ -6,19 +7,21 @@ spec:
     - name: gpu.rules
       rules:
         - alert: GPUHighTemperature
-          expr: DCGM_FI_DEV_GPU_TEMP > 83          # TODO(你来改): 查你显卡型号的降频温度阈值
-          for: 5m
+          expr: DCGM_FI_DEV_GPU_TEMP > __TODO__     # 依据: 查你显卡的降频温度(4090/A10各不同)
+          for: __TODO__                              # 瞬时尖峰要不要报?
           labels: {severity: warning}
           annotations:
-            summary: "GPU {{ $labels.gpu }} 温度 {{ $value }}C"
-            runbook: "docs/runbook/gpu-temp.md"     # 每条告警配一篇处置文档
-        - alert: DCGMExporterAbsent
-          expr: absent(DCGM_FI_DEV_GPU_UTIL)       # 问题: 为什么监控采集器本身也要被监控?
-          for: 5m
-          labels: {severity: critical}
-    - name: vllm.rules
-      rules:
-        - alert: VLLMQueueBacklog
-          expr: sum(vllm:num_requests_waiting) > 20   # TODO(你来改): 压测后用真实容量反推阈值
-          for: 3m
+            summary: "GPU {{ $labels.gpu }} on {{ $labels.Hostname }} temp {{ $value }}C"
+            runbook: docs/runbook/gpu-temp.md
+        - alert: GPUMemoryNearFull
+          expr: DCGM_FI_DEV_FB_USED / (DCGM_FI_DEV_FB_USED + DCGM_FI_DEV_FB_FREE) > __TODO__  # vLLM常驻高显存,阈值该给多少才不误报?
+          for: __TODO__
           labels: {severity: warning}
+        - alert: GPUXidError
+          expr: increase(DCGM_FI_DEV_XID_ERRORS[5m]) > 0   # XID是硬件级错误,0容忍,不留TODO
+          labels: {severity: critical}
+          annotations: {runbook: docs/runbook/gpu-xid.md}
+        - alert: DCGMExporterAbsent
+          expr: absent(DCGM_FI_DEV_GPU_UTIL)
+          for: __TODO__
+          labels: {severity: critical}   # 元监控: 采集器自己挂了

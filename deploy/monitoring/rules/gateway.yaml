@@ -1,0 +1,18 @@
+# [监控层|E类] 网关告警
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata: {name: gateway-rules, namespace: monitoring}
+spec:
+  groups:
+    - name: gateway.rules
+      rules:
+        - alert: GatewayHigh5xxRatio
+          expr: |
+            sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class="5"}[5m]))
+              / sum(rate(envoy_http_downstream_rq_total[5m])) > __TODO__   # 依据: 可用性目标(99%?99.9%?)
+          for: __TODO__
+          labels: {severity: critical}
+        - alert: RateLimit429Spike
+          expr: sum(rate(envoy_http_downstream_rq_xx{envoy_response_code_class="4"}[5m])) > __TODO__
+          for: __TODO__
+          labels: {severity: warning}   # 429不是事故,但要知道: 是配额小了还是被刷?

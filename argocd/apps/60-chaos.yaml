@@ -1,0 +1,15 @@
+# 阶段8才启用: 先在 Argo UI 里保持 manual sync,避免故障实验被自动"修复"
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: chaos-mesh
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "60"}
+spec:
+  project: default
+  source:
+    repoURL: https://charts.chaos-mesh.org
+    chart: chaos-mesh
+    targetRevision: "2.7.0"            # TODO(你来改)
+  destination: {server: https://kubernetes.default.svc, namespace: chaos-mesh}
+  syncPolicy: {}                        # 注意: 故意不配 automated,问题: 为什么?

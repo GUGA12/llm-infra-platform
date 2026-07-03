@@ -1,0 +1,15 @@
+# [网关层|B类] 鉴权: API Key起步, JWT进阶
+apiVersion: gateway.envoyproxy.io/v1alpha1
+kind: SecurityPolicy
+metadata: {name: llm-auth, namespace: gateway}
+spec:
+  targetRefs:
+    - group: gateway.networking.k8s.io
+      kind: __TODO__                 # 绑Gateway还是HTTPRoute? 影响范围有什么差别? 你选哪个
+      name: __TODO__
+  apiKeyAuth:
+    credentialRefs:
+      - name: api-keys               # 对应secret-api-keys.example.yaml, 真实件不进Git
+        namespace: gateway
+    extractFrom:
+      - headers: [__TODO__]          # 客户端把key放哪个header?

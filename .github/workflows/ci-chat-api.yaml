@@ -1,0 +1,34 @@
+name: chat-api-ci
+on:
+  push:
+    branches: [main]
+    paths: ["apps/chat-api/**"]
+permissions:
+  contents: write
+  packages: write
+jobs:
+  build-push-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: 单测
+        run: |
+          pip install -r apps/chat-api/requirements.txt pytest
+          cd apps/chat-api && pytest -q
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: 构建并推送镜像
+        uses: docker/build-push-action@v6
+        with:
+          context: apps/chat-api
+          push: true
+          tags: ghcr.io/${{ github.repository_owner }}/chat-api:${{ github.sha }}
+      - name: GitOps 关键一步 —— 回写镜像 tag, Argo 检测到变更后自动发布
+        run: |
+          sed -i "s|tag: \".*\"|tag: \"${{ github.sha }}\"|" deploy/apps/chat-api/values.yaml
+          git config user.name ci-bot && git config user.email ci@local
+          git commit -am "ci: chat-api image -> ${{ github.sha }}" && git push
+      # 必答: 为什么不让 CI 直接 kubectl apply? (答案关键词: 单一事实来源/审计/回滚)

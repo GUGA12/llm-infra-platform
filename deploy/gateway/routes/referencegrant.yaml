@@ -1,0 +1,13 @@
+# [网关层|B类] 跨命名空间引用授权 —— 没有它, 网关ns的资源无权指向inference/apps的Service
+# 问题: K8s为什么默认禁止跨ns引用? 这防的是哪类攻击/误操作?
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: ReferenceGrant
+metadata: {name: allow-gw-to-inference, namespace: inference}   # Grant放在"被引用方"的ns, 想想为什么
+spec:
+  from:
+    - group: __TODO__                # 谁来引用? aigateway.envoyproxy.io / gateway.networking.k8s.io
+      kind: __TODO__
+      namespace: gateway
+  to:
+    - group: ""                      # ""=core组
+      kind: Service

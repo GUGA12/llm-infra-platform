@@ -1,0 +1,29 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: data
+  namespace: argocd
+  annotations: {argocd.argoproj.io/sync-wave: "10"}
+spec:
+  project: default
+  sources:
+    - repoURL: registry-1.docker.io/bitnamicharts
+      chart: postgresql
+      targetRevision: "16.4.5"         # TODO(你来改)
+      helm: {valueFiles: [$values/deploy/data/postgresql-values.yaml]}
+    - repoURL: registry-1.docker.io/bitnamicharts
+      chart: redis
+      targetRevision: "20.6.1"         # TODO(你来改)
+      helm: {valueFiles: [$values/deploy/data/redis-values.yaml]}
+    # Milvus 资源较重,预算紧张可注释掉,改用 postgresql + pgvector 扩展
+    - repoURL: https://zilliztech.github.io/milvus-helm
+      chart: milvus
+      targetRevision: "4.2.30"         # TODO(你来改)
+      helm: {valueFiles: [$values/deploy/data/milvus-values.yaml]}
+    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+      targetRevision: main
+      ref: values
+  destination: {server: https://kubernetes.default.svc, namespace: data}
+  syncPolicy:
+    automated: {prune: true, selfHeal: true}
+    syncOptions: [CreateNamespace=true]
