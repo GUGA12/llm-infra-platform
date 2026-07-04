@@ -26,8 +26,9 @@ prometheus:
 grafana:
   adminPassword: 123456            # 阶段7换Secret
   sidecar:
-    dashboards: true 
-    searchNamespace: "ALL"    # 面板ConfigMap自动加载机制
+    dashboards: 
+      enabled: true 
+      searchNamespace: "ALL"    # 面板ConfigMap自动加载机制
 # 控制面抓取开关: kind/托管集群按实际可达性填, 每个写一句理由
 kubeEtcd:                   # 2381
   enabled: true
