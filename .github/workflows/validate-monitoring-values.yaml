@@ -1,0 +1,57 @@
+name: validate-monitoring-values
+
+on:
+  pull_request:
+    paths:
+      - "deploy/monitoring/values.yaml"
+      - ".github/workflows/validate-monitoring-values.yaml"
+  push:
+    branches: [main]
+    paths:
+      - "deploy/monitoring/values.yaml"
+      - ".github/workflows/validate-monitoring-values.yaml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  helm-template:
+    runs-on: ubuntu-latest
+    env:
+      HELM_VERSION: v3.21.2
+      CHART_VERSION: "72.6.2"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Add Prometheus Community chart repository
+        run: |
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo update
+
+      - name: Render kube-prometheus-stack
+        run: |
+          mkdir -p /tmp/rendered
+          helm template mon prometheus-community/kube-prometheus-stack \
+            --version "${CHART_VERSION}" \
+            --namespace monitoring \
+            -f deploy/monitoring/values.yaml \
+            > /tmp/rendered/monitoring.yaml
+          test -s /tmp/rendered/monitoring.yaml
+
+      - name: Verify key values reached rendered manifests
+        run: |
+          grep -nE 'retention:|retentionSize:|scrapeInterval:|storageClassName:' /tmp/rendered/monitoring.yaml
+          grep -nE 'serviceMonitorSelector:|ruleSelector:' /tmp/rendered/monitoring.yaml
+
+      - name: Report unresolved placeholders
+        run: |
+          if grep -n '__TODO__' deploy/monitoring/values.yaml; then
+            echo '::warning::monitoring values still contain __TODO__ placeholders'
+          fi
