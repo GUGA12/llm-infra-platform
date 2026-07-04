@@ -5,10 +5,13 @@ metadata:
   name: vllm
   namespace: monitoring
 spec:
-  namespaceSelector: {matchNames: [inference]}
+  namespaceSelector: 
+    matchNames: 
+      - inference
   selector:
-    matchLabels: {__TODO__: __TODO__}   # TODO(验证): production-stack给Service打的真实标签
+    matchLabels:      # TODO(验证): production-stack给Service打的真实标签
+      environment: router
   endpoints:
-    - port: __TODO__
+    - port: router-sport
       path: /metrics
       interval: 15s
