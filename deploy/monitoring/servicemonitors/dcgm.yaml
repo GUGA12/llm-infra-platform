@@ -6,10 +6,12 @@ metadata:
   namespace: monitoring
 spec:
   namespaceSelector:
-    matchNames: [gpu-operator]
+    matchNames: 
+      - gpu-operator
   selector:
     matchLabels:
-      app: __TODO__                  # TODO(验证): kubectl get svc -n gpu-operator --show-labels
+      app: nvidia-dcgm-exporter                 # TODO(验证): kubectl get svc -n gpu-operator --show-labels
   endpoints:
-    - port: __TODO__                 # TODO(验证): 端口"名"不是数字; kubectl get svc ... -o yaml 看 ports[].name
+    - port: gpu-metrics
+      path: /metrics                  # TODO(验证): 端口"名"不是数字; kubectl get svc ... -o yaml 看 ports[].name
       interval: 15s
