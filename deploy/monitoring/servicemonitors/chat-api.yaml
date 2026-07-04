@@ -5,11 +5,13 @@ metadata:
   name: chat-api
   namespace: monitoring
 spec:
-  namespaceSelector: {matchNames: [apps]}
+  namespaceSelector: 
+    matchNames: 
+      - apps
   selector:
     matchLabels:
-      app: __TODO__                  # 与 chart Service 的 labels 对齐(去 templates/service.yaml 里找)
+      app: chat-api                  # 与 chart Service 的 labels 对齐(去 templates/service.yaml 里找)
   endpoints:
-    - port: __TODO__                 # Service里给端口起的"名"
+    - port: http                 # Service里给端口起的"名"
       path: /metrics
       interval: 15s
