@@ -5,11 +5,11 @@ prometheus:
     retention: "7d"              # 依据: 故障演练要回看多久(建议>=7d)
     retentionSize: "8GB"          # 依据: 比 PVC 小 ~20%, 如 "8GB"
     scrapeInterval: "15s"         # 15s精度高/30s省一半磁盘
-    serviceMonitorSelectorNilUsesHelmValues: flase   # 作用: 允许 Prometheus 发现仓库里手写的 ServiceMonitor。# 配置依据: 本项目后续 chat-api/vllm/dcgm 都是自定义 ServiceMonitor。# 错误后果: YAML apply 成功但 Prometheus targets 里没有 job，属于静默失联。
-    ruleSelectorNilUsesHelmValues: flase
+    serviceMonitorSelectorNilUsesHelmValues: false   # 作用: 允许 Prometheus 发现仓库里手写的 ServiceMonitor。# 配置依据: 本项目后续 chat-api/vllm/dcgm 都是自定义 ServiceMonitor。# 错误后果: YAML apply 成功但 Prometheus targets 里没有 job，属于静默失联。
+    ruleSelectorNilUsesHelmValues: false
     resources:
       requests: 
-        cpu:  "1G"
+        cpu:  "1"
         memory: "1.5Gi"
       limits:          # 问题: 为什么很多团队不给CPU设limit?
         memory: "2Gi"
@@ -48,7 +48,8 @@ alertmanager:
       group_wait: 30s           # 首次聚合等待,常见30s; 太短=告警风暴,太长=响应慢
       repeat_interval: 2h      # 未恢复多久重发,常见4h
       routes:
-        - matchers: 'severity="critical"'
+        matchers: 
+          - severity="critical"
           receiver: im-critical
     receivers:
       - name: default
