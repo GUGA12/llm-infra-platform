@@ -2,38 +2,52 @@
 # 每个 __TODO__ 旁边写一句"我为什么这么填"
 prometheus:
   prometheusSpec:
-    retention: __TODO__              # 依据: 故障演练要回看多久(建议>=7d)
-    retentionSize: __TODO__          # 依据: 比 PVC 小 ~20%, 如 "8GB"
-    scrapeInterval: __TODO__         # 15s精度高/30s省一半磁盘
-    serviceMonitorSelectorNilUsesHelmValues: __TODO__   # 填错=自写SM被静默忽略
-    ruleSelectorNilUsesHelmValues: __TODO__
+    retention: "7d"              # 依据: 故障演练要回看多久(建议>=7d)
+    retentionSize: "8GB"          # 依据: 比 PVC 小 ~20%, 如 "8GB"
+    scrapeInterval: "15s"         # 15s精度高/30s省一半磁盘
+    serviceMonitorSelectorNilUsesHelmValues: flase   # 作用: 允许 Prometheus 发现仓库里手写的 ServiceMonitor。# 配置依据: 本项目后续 chat-api/vllm/dcgm 都是自定义 ServiceMonitor。# 错误后果: YAML apply 成功但 Prometheus targets 里没有 job，属于静默失联。
+    ruleSelectorNilUsesHelmValues: flase
     resources:
-      requests: {cpu: __TODO__, memory: __TODO__}
-      limits: {memory: __TODO__}     # 问题: 为什么很多团队不给CPU设limit?
+      requests: 
+        cpu:  "1G"
+        memory: "1.5Gi"
+      limits:          # 问题: 为什么很多团队不给CPU设limit?
+        memory: "2Gi"
+        
     storageSpec:
       volumeClaimTemplate:
         spec:
-          storageClassName: __TODO__ # kind: kubectl get sc 看默认; 服务器上重新确认
-          accessModes: [ReadWriteOnce]
-          resources: {requests: {storage: __TODO__}}
+          storageClassName: standard   # kind: kubectl get sc 看默认; 服务器上重新确认
+          accessModes: 
+            - ReadWriteOnce
+          resources: 
+             requests: 
+               storage: "10Gi"
 grafana:
-  adminPassword: __TODO__            # 阶段7换Secret
+  adminPassword: 123456            # 阶段7换Secret
   sidecar:
-    dashboards: {enabled: __TODO__, searchNamespace: __TODO__}  # 面板ConfigMap自动加载机制
+    dashboards: true 
+    searchNamespace: "ALL"    # 面板ConfigMap自动加载机制
 # 控制面抓取开关: kind/托管集群按实际可达性填, 每个写一句理由
-kubeEtcd: {enabled: __TODO__}
-kubeScheduler: {enabled: __TODO__}
-kubeControllerManager: {enabled: __TODO__}
-kubeProxy: {enabled: __TODO__}
+kubeEtcd:                   # 2381
+  enabled: true
+kubeScheduler:              # 10259
+  enabled: true
+kubeControllerManager:       # 10257
+  enabled: true
+kubeProxy:                   # 10249
+  enabled: true
 alertmanager:
   config:
     route:
       receiver: default
-      group_by: [alertname, namespace]
-      group_wait: __TODO__           # 首次聚合等待,常见30s; 太短=告警风暴,太长=响应慢
-      repeat_interval: __TODO__      # 未恢复多久重发,常见4h
+      group_by: 
+        - alertname
+        - namespace
+      group_wait: 30s           # 首次聚合等待,常见30s; 太短=告警风暴,太长=响应慢
+      repeat_interval: 2h      # 未恢复多久重发,常见4h
       routes:
-        - matchers: ['severity="critical"']
+        - matchers: 'severity="critical"'
           receiver: im-critical
     receivers:
       - name: default
