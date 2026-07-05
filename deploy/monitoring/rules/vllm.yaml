@@ -1,24 +1,30 @@
 # [监控层|E类] 推理服务告警
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
-metadata: {name: vllm-rules, namespace: monitoring}
+metadata: 
+  name: vllm-rules
+  namespace: monitoring
 spec:
   groups:
     - name: vllm.rules
       rules:
         - alert: VLLMQueueBacklog
-          expr: sum(vllm:num_requests_waiting) > __TODO__   # 依据: 压测出单副本安全并发后回填, 先拍一个
-          for: __TODO__
-          labels: {severity: warning}
-        - alert: VLLMTTFTP99High
-          expr: histogram_quantile(0.99, sum(rate(vllm:time_to_first_token_seconds_bucket[5m])) by (le)) > __TODO__   # 依据: 你的SLA
-          for: __TODO__
-          labels: {severity: warning}
-        - alert: VLLMKVCacheSaturated
-          expr: avg(vllm:gpu_cache_usage_perc) > __TODO__
-          for: __TODO__
-          labels: {severity: warning}
-        - alert: VLLMNoHealthyReplica
-          expr: sum(up{job=~"__TODO__"}) == 0        # TODO(验证): Prometheus targets页看真实job名
+          expr: sum(vllm:num_requests_waiting) > 10  # 依据: 压测出单副本安全并发后回填, 先拍一个
           for: 2m
-          labels: {severity: critical}
+          labels: 
+            severity: warning
+        - alert: VLLMTTFTP99High
+          expr: histogram_quantile(0.99, sum(rate(vllm:time_to_first_token_seconds_bucket[5m])) by (le)) > 3  # 依据: 你的SLA
+          for: 3m
+          labels: 
+            severity: warning
+        - alert: VLLMKVCacheSaturated
+          expr: avg(vllm:gpu_cache_usage_perc) > 0.9
+          for: 5m
+          labels: 
+            severity: warning
+        - alert: VLLMNoHealthyReplica
+          expr: sum(up{job=~".*-router-service"}) == 0        # TODO(验证): Prometheus targets页看真实job名
+          for: 2m
+          labels: 
+            severity: critical
