@@ -1,11 +1,11 @@
 # [数据层|A类] PostgreSQL (bitnami)
 auth:
-  database: __TODO__
-  username: __TODO__
-  password: __TODO__                 # 阶段7换existingSecret; 先跑通并在此注明技术债
+  database: chatdb
+  username: chat
+  password: 123456                 # 阶段7换existingSecret; 先跑通并在此注明技术债
 primary:
-  persistence: {size: __TODO__}      # 依据: 审计日志增长估算, 学习环境8Gi够
+  persistence: {size: 8Gi}      # 依据: 审计日志增长估算, 学习环境8Gi够
   resources:
-    requests: {cpu: __TODO__, memory: __TODO__}
+    requests: {cpu: 500m, memory: 1G}
 # 走pgvector省Milvus: image.repository=pgvector/pgvector, tag=pg16
 # 并加 primary.initdb.scripts 执行 CREATE EXTENSION vector;
