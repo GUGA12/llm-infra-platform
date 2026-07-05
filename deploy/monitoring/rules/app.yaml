@@ -7,10 +7,10 @@ spec:
     - name: chat-api.rules
       rules:
         - alert: ChatAPIP99High
-          expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{handler="/v1/chat"}[5m])) by (le)) > __TODO__
-          for: __TODO__
+          expr: histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{handler="/v1/chat"}[5m])) by (le)) > 5
+          for: 5m
           labels: {severity: warning}
         - alert: ChatAPIErrorRatio
-          expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > __TODO__
-          for: __TODO__
+          expr: sum(rate(http_requests_total{status=~"5.."}[5m])) / sum(rate(http_requests_total[5m])) > 0.01
+          for: 5m
           labels: {severity: critical}
