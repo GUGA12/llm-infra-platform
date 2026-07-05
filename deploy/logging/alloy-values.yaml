@@ -8,6 +8,6 @@ alloy:
         forward_to = [loki.write.default.receiver]
       }
       loki.write "default" {
-        endpoint { url = "http://__TODO__.logging.svc:3100/loki/api/v1/push" }
+        endpoint { url = "http://logging-loki.logging.svc:3100/loki/api/v1/push" }
         # TODO(验证): 装完loki后 kubectl get svc -n logging 填真实svc名
       }
