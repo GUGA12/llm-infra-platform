@@ -4,6 +4,6 @@ cluster: {enabled: false}
 etcd: {replicaCount: 1}
 minio: {mode: standalone}
 standalone:
-  persistence: {persistentVolumeClaim: {size: __TODO__}}
+  persistence: {persistentVolumeClaim: {size: 20Gi}}
   resources:
-    requests: {cpu: __TODO__, memory: __TODO__}   # Milvus吃内存,笔记本上给多少?给不起怎么办?
+    requests: {cpu: 1, memory: 2Gi}   # Milvus吃内存,笔记本上给多少?给不起怎么办?
