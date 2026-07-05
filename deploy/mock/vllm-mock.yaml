@@ -41,7 +41,7 @@ metadata:
   namespace: inference
   labels: {app: vllm-mock}
 spec:
-  replicas: __TODO__                 # 练限流/压测想要几个副本?
+  replicas: 2                 # 练限流/压测想要几个副本?
   selector: {matchLabels: {app: vllm-mock}}
   template:
     metadata:
@@ -68,6 +68,6 @@ metadata:
 spec:
   selector: {app: vllm-mock}
   ports:
-    - name: __TODO__                 # 端口名: 你的vllm.yaml SM里endpoints.port填的什么,这里就叫什么
+    - name: http                 # 端口名: 你的vllm.yaml SM里endpoints.port填的什么,这里就叫什么
       port: 80
       targetPort: 8000
