@@ -12,9 +12,9 @@ loki:
         schema: v13
         index: {prefix: index_, period: 24h}
   limits_config:
-    retention_period: __TODO__       # 日志留多久? 依据与指标retention一致的思路
+    retention_period: 168h       # 日志留多久? 依据与指标retention一致的思路
 singleBinary:
   replicas: 1
   persistence:
-    enabled: __TODO__                # 不开=Pod重启日志全丢, 演练复盘还能做吗?
-    size: __TODO__
+    enabled: true                # 不开=Pod重启日志全丢, 演练复盘还能做吗?
+    size: 10Gi
