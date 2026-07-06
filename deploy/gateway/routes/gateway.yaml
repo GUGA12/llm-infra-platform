@@ -10,7 +10,7 @@ spec:
       protocol: HTTP
       allowedRoutes:
         namespaces:
-          from: __TODO__             # All/Same/Selector; 生产为什么少用All? 你选哪个并说明
+          from: Selector             # All/Same/Selector; 生产为什么少用All? 你选哪个并说明
     # ---- 阶段5启用HTTPS ----
     # - name: https
     #   port: 443
