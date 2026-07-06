@@ -4,13 +4,13 @@ image:
   tag: "0.1.0"                       # CI会自动改这一行(见ci-chat-api.yaml的sed), 所以格式别动
 replicaCount: 2                 # 最少几个才能演示"滚动更新不断流"?
 resources:
-  requests: {cpu: 500m, memory: 512mi}
-  limits: {cpu: 1G, memory: 1Gi}   # limit太低会看到什么现象?(两种)
+  requests: {cpu: 500m, memory: 512Mi}
+  limits: {cpu: 1, memory: 1Gi}   # limit太低会看到什么现象?(两种)
 env:
   VLLM_BASE_URL: http://vllm-router-service.inference/v1   # kind循环打到mock,零改动
   MODEL_NAME: mock-model               # kind循环填mock-model; GPU循环填真模型名
   REDIS_URL: redis://data-redis-master.data.svc:6379/0    # TODO(验证): 装完redis看svc真名
-  PG_DSN: postgresql://chat:<password>@pg-postgresql.data.svc:5432/chatdb                  # 格式: postgresql://user:pass@host.ns.svc:5432/db; 阶段7入Secret
+  PG_DSN: postgresql://chat:123456@data-postgresql.data.svc:5432/chatdb                  # 格式: postgresql://user:pass@host.ns.svc:5432/db; 阶段7入Secret
 hpa:
   enabled: true
   minReplicas: 1
