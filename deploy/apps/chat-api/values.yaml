@@ -1,18 +1,18 @@
 # [业务层|C类] 自研chart的"问卷"。模板在templates/, 每个值都被哪行模板消费,要能指出来
 image:
-  repository: __TODO__               # ghcr.io/<你的用户名>/chat-api
+  repository: ghcr.io/guga12/chat-api              # ghcr.io/<你的用户名>/chat-api
   tag: "0.1.0"                       # CI会自动改这一行(见ci-chat-api.yaml的sed), 所以格式别动
-replicaCount: __TODO__               # 最少几个才能演示"滚动更新不断流"?
+replicaCount: 2                 # 最少几个才能演示"滚动更新不断流"?
 resources:
-  requests: {cpu: __TODO__, memory: __TODO__}
-  limits: {cpu: __TODO__, memory: __TODO__}   # limit太低会看到什么现象?(两种)
+  requests: {cpu: 500m, memory: 512mi}
+  limits: {cpu: 1G, memory: 1Gi}   # limit太低会看到什么现象?(两种)
 env:
   VLLM_BASE_URL: http://vllm-router-service.inference/v1   # kind循环打到mock,零改动
-  MODEL_NAME: __TODO__               # kind循环填mock-model; GPU循环填真模型名
-  REDIS_URL: redis://__TODO__.data.svc:6379/0    # TODO(验证): 装完redis看svc真名
-  PG_DSN: __TODO__                   # 格式: postgresql://user:pass@host.ns.svc:5432/db; 阶段7入Secret
+  MODEL_NAME: mock-model               # kind循环填mock-model; GPU循环填真模型名
+  REDIS_URL: redis://data-redis-master.data.svc:6379/0    # TODO(验证): 装完redis看svc真名
+  PG_DSN: postgresql://chat:<password>@pg-postgresql.data.svc:5432/chatdb                  # 格式: postgresql://user:pass@host.ns.svc:5432/db; 阶段7入Secret
 hpa:
   enabled: true
-  minReplicas: __TODO__
-  maxReplicas: __TODO__
-  targetCPU: __TODO__                # 为什么业务层用CPU、推理层用队列?一句话
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPU: 70                # 为什么业务层用CPU、推理层用队列?一句话
