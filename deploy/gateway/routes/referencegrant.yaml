@@ -5,8 +5,8 @@ kind: ReferenceGrant
 metadata: {name: allow-gw-to-inference, namespace: inference}   # Grant放在"被引用方"的ns, 想想为什么
 spec:
   from:
-    - group: __TODO__                # 谁来引用? aigateway.envoyproxy.io / gateway.networking.k8s.io
-      kind: __TODO__
+    - group: aigateway.envoyproxy.io                # 谁来引用? aigateway.envoyproxy.io / gateway.networking.k8s.io
+      kind: AIServiceBackend
       namespace: gateway
   to:
     - group: ""                      # ""=core组
