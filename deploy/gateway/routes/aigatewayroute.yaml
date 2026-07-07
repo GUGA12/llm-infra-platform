@@ -20,6 +20,6 @@ metadata: {name: vllm-backend, namespace: gateway}
 spec:
   schema: {name: OpenAI}
   backendRef:
-    name: vllm-backend
+    name: vllm-backend-service
     namespace: inference
     port: 80
