@@ -8,11 +8,11 @@ spec:
   apiSchema: {name: OpenAI}
   rules:
     - matches:
-        - headers: [{name: x-ai-eg-model, value: __TODO__}]   # 与你modelSpec里的模型名对齐
+        - headers: [{name: x-ai-eg-model, value: mock-model}]   # 与你modelSpec里的模型名对齐
       backendRefs: [{name: vllm-backend}]
   llmRequestCosts:
     - metadataKey: llm_total_tokens
-      type: __TODO__                 # InputToken/OutputToken/TotalToken; 限流该按哪个? 为什么?
+      type: TotalToken                 # InputToken/OutputToken/TotalToken; 限流该按哪个? 为什么?
 ---
 apiVersion: aigateway.envoyproxy.io/v1alpha1
 kind: AIServiceBackend
@@ -20,6 +20,6 @@ metadata: {name: vllm-backend, namespace: gateway}
 spec:
   schema: {name: OpenAI}
   backendRef:
-    name: __TODO__
+    name: vllm-backend
     namespace: inference
-    port: __TODO__
+    port: 80
