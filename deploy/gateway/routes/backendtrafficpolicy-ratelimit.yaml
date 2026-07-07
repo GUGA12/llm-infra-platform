@@ -12,10 +12,10 @@ spec:
     global:
       rules:
         - clientSelectors:
-            - headers: [{name: __TODO__, type: Distinct}]   # 按什么维度限? 谁负责注入这个header?
+            - headers: [{name: x-client-id, type: Distinct}]   # 按什么维度限? 谁负责注入这个header?
           limit:
-            requests: __TODO__       # 这里的"requests"计的是token成本; 每小时给多少? 写估算过程
-            unit: __TODO__
+            requests: 1000       # 这里的"requests"计的是token成本; 每小时给多少? 写估算过程
+            unit: Hour
           cost:
             response:
               from: Metadata
