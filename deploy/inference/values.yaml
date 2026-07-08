@@ -1,17 +1,17 @@
 # [推理层|A类] vLLM production-stack
 # 先小模型打通(第一块), 再切7B(第二块)。切换=注释开关,两块都要填
 servingEngineSpec:
-  runtimeClassName: __TODO__         # ""还是"nvidia"? 用 kubectl get runtimeclass 判断; kind里填什么?
+  runtimeClassName:   nvidia       # ""还是"nvidia"? 用 kubectl get runtimeclass 判断; kind里填什么?
   modelSpec:
     - name: "opt125m"
       repository: "vllm/vllm-openai"
-      tag: __TODO__                  # 固定版本! 去该镜像tags页选当前稳定版, 记录选择理由
+      tag: v0.8.5                  # 固定版本! 去该镜像tags页选当前稳定版, 记录选择理由
       modelURL: "facebook/opt-125m"
       replicaCount: 1
-      requestCPU: __TODO__
-      requestMemory: __TODO__
+      requestCPU: "1"
+      requestMemory: "4Gi"
       requestGPU: 1
-      pvcStorage: __TODO__           # 权重缓存; opt-125m很小, 但PVC还要装什么?(HF缓存结构)
+      pvcStorage: "10Gi"           # 权重缓存; opt-125m很小, 但PVC还要装什么?(HF缓存结构)
     # ---- 7B 块(打通后启用) ----
     # - name: "qwen25-7b"
     #   repository: "vllm/vllm-openai"
@@ -28,4 +28,4 @@ servingEngineSpec:
 routerSpec:
   enabled: true
   resources:
-    requests: {cpu: __TODO__, memory: __TODO__}
+    requests: {cpu: "1", memory: "1Gi"}
