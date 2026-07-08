@@ -4,19 +4,19 @@ kind: ScaledObject
 metadata: {name: vllm-scaler, namespace: inference}
 spec:
   scaleTargetRef:
-    name: __TODO__                   # TODO(验证): kubectl get deploy -n inference 抄真名
-  minReplicaCount: __TODO__          # 为什么vLLM一般不scale-to-zero?(冷启动代价)
-  maxReplicaCount: __TODO__          # 依据: 你有几张卡/是否开time-slicing
-  cooldownPeriod: __TODO__           # 为什么要比无状态服务长?
+    name: vllm-mock                   # TODO(验证): kubectl get deploy -n inference 抄真名
+  minReplicaCount: 1          # 为什么vLLM一般不scale-to-zero?(冷启动代价)
+  maxReplicaCount: 2          # 依据: 你有几张卡/是否开time-slicing
+  cooldownPeriod: 300           # 为什么要比无状态服务长?
   triggers:
     - type: prometheus
       metadata:
-        serverAddress: http://__TODO__.monitoring.svc:9090   # TODO(验证): prometheus svc真名
+        serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc:9090   # TODO(验证): prometheus svc真名
         query: sum(vllm:num_requests_waiting)
-        threshold: __TODO__          # 压测得出单副本安全并发后回填; 先拍一个并写推理
+        threshold: "5"         # 压测得出单副本安全并发后回填; 先拍一个并写推理
   advanced:
     horizontalPodAutoscalerConfig:
       behavior:
         scaleDown:
-          stabilizationWindowSeconds: __TODO__
-          policies: [{type: Pods, value: 1, periodSeconds: __TODO__}]  # 限速缩容防抖动
+          stabilizationWindowSeconds: 600
+          policies: [{type: Pods, value: 1, periodSeconds: 60}]  # 限速缩容防抖动
