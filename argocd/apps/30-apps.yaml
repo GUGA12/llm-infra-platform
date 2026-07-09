@@ -8,7 +8,7 @@ spec:
   project: default
   sources:
     # 自研 chat-api: chart 在本仓库
-    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
       targetRevision: main
       path: deploy/apps/chat-api
       helm: {releaseName: chat-api}
