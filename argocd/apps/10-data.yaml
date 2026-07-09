@@ -20,7 +20,7 @@ spec:
       chart: milvus
       targetRevision: "4.2.30"         # TODO(你来改)
       helm: {valueFiles: [$values/deploy/data/milvus-values.yaml]}
-    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
       targetRevision: main
       ref: values
   destination: {server: https://kubernetes.default.svc, namespace: data}
