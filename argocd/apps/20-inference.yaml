@@ -13,7 +13,7 @@ spec:
       targetRevision: "*"                # TODO(你来改): 固定版本号,理由写在 PR 里
       helm:
         valueFiles: [$values/deploy/inference/values.yaml]
-    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
       targetRevision: main
       ref: values
   destination: {server: https://kubernetes.default.svc, namespace: inference}
