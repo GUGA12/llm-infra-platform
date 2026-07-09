@@ -15,7 +15,7 @@ spec:
       chart: alloy
       targetRevision: "1.0.3"          # TODO(你来改)
       helm: {valueFiles: [$values/deploy/logging/alloy-values.yaml]}
-    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
       targetRevision: main
       ref: values
   destination: {server: https://kubernetes.default.svc, namespace: logging}
