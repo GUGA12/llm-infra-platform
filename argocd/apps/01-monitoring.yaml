@@ -13,10 +13,10 @@ spec:
       targetRevision: "72.6.2"           # TODO(你来改): 查当前最新稳定版并固定
       helm:
         valueFiles: [$values/deploy/monitoring/values.yaml]
-    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
       targetRevision: main
       ref: values
-    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
       targetRevision: main
       path: deploy/monitoring/servicemonitors
   destination: {server: https://kubernetes.default.svc, namespace: monitoring}
