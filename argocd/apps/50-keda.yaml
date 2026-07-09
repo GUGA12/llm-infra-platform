@@ -10,7 +10,7 @@ spec:
     - repoURL: https://kedacore.github.io/charts
       chart: keda
       targetRevision: "2.16.1"         # TODO(你来改)
-    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
       targetRevision: main
       path: deploy/inference            # ScaledObject 跟随 KEDA 一起同步
       directory: {include: "keda-scaledobject.yaml"}
