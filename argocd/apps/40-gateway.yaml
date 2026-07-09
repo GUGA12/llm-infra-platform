@@ -16,7 +16,7 @@ spec:
       targetRevision: "v0.2.0"         # TODO(你来改): Envoy AI Gateway 迭代快,读 release notes
       helm: {releaseName: aieg}
     # 路由/策略等自写 CR 也由 Argo 管
-    - repoURL: https://github.com/YOUR_NAME/llm-infra-platform.git   # TODO(你来改)
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
       targetRevision: main
       path: deploy/gateway/routes
   destination: {server: https://kubernetes.default.svc, namespace: gateway}
