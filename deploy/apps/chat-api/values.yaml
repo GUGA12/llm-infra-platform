@@ -2,7 +2,7 @@
 image:
   repository: ghcr.io/guga12/chat-api              # ghcr.io/<你的用户名>/chat-api
   tag: "beafe63a3e74d44218de4fb90d588c21cffc50d8"  # CI会自动改这一行(见ci-chat-api.yaml的sed), 所以格式别动
-replicaCount: 1                 # 单节点学习环境先运行1个副本
+replicaCount: 1                 # HPA最小维持1个副本
 resources:
   requests: {cpu: 200m, memory: 256Mi}
   limits: {cpu: 1, memory: 1Gi}
@@ -12,7 +12,7 @@ env:
   REDIS_URL: redis://redis-master.data.svc.cluster.local:6379/0
   PG_DSN: postgresql://chat:123456@pg-postgresql.data.svc.cluster.local:5432/chatdb
 hpa:
-  enabled: false
+  enabled: true
   minReplicas: 1
-  maxReplicas: 1
+  maxReplicas: 3
   targetCPU: 70
