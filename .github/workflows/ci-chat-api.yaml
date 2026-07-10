@@ -1,8 +1,11 @@
 name: chat-api-ci
 on:
+  workflow_dispatch:
   push:
     branches: [main]
-    paths: ["apps/chat-api/**"]
+    paths:
+      - "apps/chat-api/**"
+      - ".github/workflows/ci-chat-api.yaml"
 permissions:
   contents: write
   packages: write
@@ -25,7 +28,7 @@ jobs:
         with:
           context: apps/chat-api
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/chat-api:${{ github.sha }}
+          tags: ghcr.io/guga12/chat-api:${{ github.sha }}
       - name: GitOps 关键一步 —— 回写镜像 tag, Argo 检测到变更后自动发布
         run: |
           sed -i "s|tag: \".*\"|tag: \"${{ github.sha }}\"|" deploy/apps/chat-api/values.yaml
