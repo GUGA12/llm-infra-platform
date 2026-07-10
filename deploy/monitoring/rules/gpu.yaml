@@ -23,5 +23,5 @@ spec:
           annotations: {runbook: docs/runbook/gpu-xid.md}
         - alert: DCGMExporterAbsent
           expr: absent(DCGM_FI_DEV_GPU_UTIL)
-          for: __TODO__
+          for: 5m
           labels: {severity: critical}   # 元监控: 采集器自己挂了
