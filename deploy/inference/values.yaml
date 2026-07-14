@@ -1,7 +1,7 @@
 # [推理层|A类] vLLM production-stack
 # 先小模型打通(第一块), 再切7B(第二块)。切换=注释开关,两块都要填
 servingEngineSpec:
-  runtimeClassName:   nvidia       # ""还是"nvidia"? 用 kubectl get runtimeclass 判断; kind里填什么?
+  runtimeClassName: ""       # ""还是"nvidia"? 用 kubectl get runtimeclass 判断; kind里填什么?
   modelSpec:
     - name: "opt125m"
       repository: "vllm/vllm-openai"
