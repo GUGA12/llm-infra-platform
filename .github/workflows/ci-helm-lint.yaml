@@ -1,14 +1,99 @@
 name: lint
-on: [push, pull_request]
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
 jobs:
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
+    env:
+      HELM_VERSION: v3.21.3
+      KUBECONFORM_VERSION: v0.8.0
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: azure/setup-helm@v4
-      - name: helm lint 自研chart
-        run: helm lint deploy/apps/chat-api
-      - name: kubeconform 校验K8s清单
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: ${{ env.HELM_VERSION }}
+
+      - name: Set up Go
+        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: "1.26.x"
+          cache: false
+
+      - name: Reject known logging value typos
         run: |
-          go install github.com/yannh/kubeconform/cmd/kubeconform@latest
-          find deploy -name '*.yaml' ! -name 'values*.yaml' -print0 | xargs -0 $HOME/go/bin/kubeconform -ignore-missing-schemas -summary
+          if grep -RInE '(^|[[:space:]])(bucketName|amdin|volumClaimsEnabled):' deploy/logging; then
+            echo "Found invalid Loki value keys"
+            exit 1
+          fi
+
+      - name: Lint custom Helm chart
+        run: helm lint deploy/apps/chat-api --strict
+
+      - name: Add Helm repositories
+        run: |
+          helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo update
+
+      - name: Render Helm charts
+        run: |
+          mkdir -p /tmp/rendered
+          helm template chat-api deploy/apps/chat-api \
+            --namespace inference \
+            > /tmp/rendered/chat-api.yaml
+          helm template logging grafana/loki \
+            --version 6.29.0 \
+            --namespace logging \
+            -f deploy/logging/loki-values.yaml \
+            > /tmp/rendered/loki.yaml
+          helm template logging grafana/alloy \
+            --version 1.0.3 \
+            --namespace logging \
+            -f deploy/logging/alloy-values.yaml \
+            > /tmp/rendered/alloy.yaml
+          test -s /tmp/rendered/chat-api.yaml
+          test -s /tmp/rendered/loki.yaml
+          test -s /tmp/rendered/alloy.yaml
+
+      - name: Verify important rendered values
+        run: |
+          grep -q 'name: logging-loki-gateway' /tmp/rendered/loki.yaml
+          grep -q 'storageClassName: local-path' /tmp/rendered/loki.yaml
+          grep -q 'logging-loki-gateway.logging.svc:80' /tmp/rendered/alloy.yaml
+
+      - name: Install kubeconform
+        run: go install github.com/yannh/kubeconform/cmd/kubeconform@${KUBECONFORM_VERSION}
+
+      - name: Validate rendered Helm manifests
+        run: |
+          "$HOME/go/bin/kubeconform" \
+            -strict \
+            -ignore-missing-schemas \
+            -summary \
+            /tmp/rendered/*.yaml
+
+      - name: Validate raw Kubernetes manifests
+        run: |
+          find argocd bootstrap deploy \
+            -type f \
+            -name '*.yaml' \
+            ! -path '*/templates/*' \
+            ! -name 'values.yaml' \
+            ! -name '*-values.yaml' \
+            ! -name 'Chart.yaml' \
+            -print0 |
+          xargs -0 -r "$HOME/go/bin/kubeconform" \
+            -strict \
+            -ignore-missing-schemas \
+            -summary
