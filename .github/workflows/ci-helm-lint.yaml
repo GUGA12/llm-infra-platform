@@ -104,11 +104,11 @@ jobs:
               exit
             }
           ' /tmp/rendered/monitoring.yaml |
-          base64 --decode > /tmp/rendered/alertmanager.yaml
-          test -s /tmp/rendered/alertmanager.yaml
+          base64 --decode > /tmp/alertmanager.yaml
+          test -s /tmp/alertmanager.yaml
           docker run --rm \
             --entrypoint=/bin/amtool \
-            -v /tmp/rendered/alertmanager.yaml:/etc/alertmanager/alertmanager.yml:ro \
+            -v /tmp/alertmanager.yaml:/etc/alertmanager/alertmanager.yml:ro \
             quay.io/prometheus/alertmanager:v0.33.1 \
             check-config /etc/alertmanager/alertmanager.yml
 
