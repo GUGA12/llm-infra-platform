@@ -37,6 +37,11 @@ jobs:
             echo "Found invalid Loki value keys"
             exit 1
           fi
+          if grep -nE '^[[:space:]]+#' deploy/logging/alloy-values.yaml; then
+            echo "Found YAML-style comments inside Alloy River configuration"
+            echo "Use // or /* */ comments in River configuration"
+            exit 1
+          fi
 
       - name: Lint custom Helm chart
         run: helm lint deploy/apps/chat-api --strict

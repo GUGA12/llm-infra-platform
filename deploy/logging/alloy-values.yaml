@@ -9,5 +9,5 @@ alloy:
       }
       loki.write "default" {
         endpoint { url = "http://logging-loki-gateway.logging.svc:80/loki/api/v1/push" }
-        # TODO(验证): 装完loki后 kubectl get svc -n logging 填真实svc名
+        // TODO(验证): 装完loki后 kubectl get svc -n logging 填真实svc名
       }
