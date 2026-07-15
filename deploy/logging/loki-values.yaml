@@ -5,10 +5,10 @@ loki:
   commonConfig: {replication_factor: 1}
   storage: 
     type: s3
-    bucketName:
+    bucketNames:
       chunks: chunks
       ruler: ruler
-      amdin: admin
+      admin: admin
   schemaConfig:
     configs:
       - from: "2024-01-01"
@@ -23,7 +23,7 @@ singleBinary:
 write:
   replicas: 1
   persistence:
-    volumClaimsEnabled: true
+    volumeClaimsEnabled: true
     storageClass: local-path
     size: 5Gi
   resources:
@@ -43,7 +43,7 @@ read:
 backend:
   replicas: 1
   persistence:
-    volumClaimsEnabled: true
+    volumeClaimsEnabled: true
     storageClass: local-path
     size: 5Gi
   resources:
