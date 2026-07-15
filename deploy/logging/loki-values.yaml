@@ -1,20 +1,67 @@
-# [日志层|A类] Loki 单二进制形态(学习环境)。问题: 生产为何用SimpleScalable?
-deploymentMode: SingleBinary
+# [logging|A] Loki SimpleScalable single-node validation profile
+deploymentMode: SimpleScalable
 loki:
   auth_enabled: false
   commonConfig: {replication_factor: 1}
-  storage: {type: filesystem}
+  storage:
+    type: s3
+    bucketNames:
+      chunks: chunks
+      ruler: ruler
+      admin: admin
   schemaConfig:
     configs:
       - from: "2024-01-01"
         store: tsdb
-        object_store: filesystem
+        object_store: s3
         schema: v13
         index: {prefix: index_, period: 24h}
   limits_config:
     retention_period: 168h       # 日志留多久? 依据与指标retention一致的思路
 singleBinary:
+  replicas: 0
+write:
   replicas: 1
   persistence:
-    enabled: true                # 不开=Pod重启日志全丢, 演练复盘还能做吗?
-    size: 10Gi
+    volumeClaimsEnabled: true
+    storageClass: local-path
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+read:
+  replicas: 1
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+backend:
+  replicas: 1
+  persistence:
+    volumeClaimsEnabled: true
+    storageClass: local-path
+    size: 5Gi
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+chunksCache:
+  enabled: false
+
+resultsCache:
+  enabled: false
+
+minio:
+  enabled: true
+  replicas: 1
+  drivesPerNode: 2
+  persistence:
+    storageClass: local-path               # 不开=Pod重启日志全丢, 演练复盘还能做吗?
+    size: 5Gi
