@@ -93,6 +93,25 @@ jobs:
           grep -q 'name: monitoring-grafana-admin' /tmp/rendered/monitoring.yaml
           test "$(grep -c 'storageClassName: local-path' /tmp/rendered/monitoring.yaml)" -ge 3
 
+      - name: Validate rendered Alertmanager config
+        run: |
+          awk '
+            /name: alertmanager-monitoring-kube-prometheus-alertmanager/ { in_secret=1 }
+            in_secret && /alertmanager.yaml:/ {
+              value=$2
+              gsub(/"/, "", value)
+              print value
+              exit
+            }
+          ' /tmp/rendered/monitoring.yaml |
+          base64 --decode > /tmp/alertmanager.yaml
+          test -s /tmp/alertmanager.yaml
+          docker run --rm \
+            --entrypoint=/bin/amtool \
+            -v /tmp/alertmanager.yaml:/etc/alertmanager/alertmanager.yml:ro \
+            quay.io/prometheus/alertmanager:v0.33.1 \
+            check-config /etc/alertmanager/alertmanager.yml
+
       - name: Install kubeconform
         run: go install github.com/yannh/kubeconform/cmd/kubeconform@${KUBECONFORM_VERSION}
 
