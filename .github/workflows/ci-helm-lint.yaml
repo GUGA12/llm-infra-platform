@@ -43,12 +43,20 @@ jobs:
             exit 1
           fi
 
+      - name: Reject unsafe monitoring placeholders
+        run: |
+          if grep -nE 'adminPassword:|storageClassName:[[:space:]]+standard|__TODO__' deploy/monitoring/values.yaml; then
+            echo "Found an unsafe monitoring placeholder or invalid storage class"
+            exit 1
+          fi
+
       - name: Lint custom Helm chart
         run: helm lint deploy/apps/chat-api --strict
 
       - name: Add Helm repositories
         run: |
           helm repo add grafana https://grafana.github.io/helm-charts
+          helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
           helm repo update
 
       - name: Render Helm charts
@@ -67,15 +75,23 @@ jobs:
             --namespace logging \
             -f deploy/logging/alloy-values.yaml \
             > /tmp/rendered/alloy.yaml
+          helm template monitoring prometheus-community/kube-prometheus-stack \
+            --version 87.16.1 \
+            --namespace monitoring \
+            -f deploy/monitoring/values.yaml \
+            > /tmp/rendered/monitoring.yaml
           test -s /tmp/rendered/chat-api.yaml
           test -s /tmp/rendered/loki.yaml
           test -s /tmp/rendered/alloy.yaml
+          test -s /tmp/rendered/monitoring.yaml
 
       - name: Verify important rendered values
         run: |
           grep -q 'name: logging-loki-gateway' /tmp/rendered/loki.yaml
           grep -q 'storageClassName: local-path' /tmp/rendered/loki.yaml
           grep -q 'logging-loki-gateway.logging.svc:80' /tmp/rendered/alloy.yaml
+          grep -q 'name: monitoring-grafana-admin' /tmp/rendered/monitoring.yaml
+          test "$(grep -c 'storageClassName: local-path' /tmp/rendered/monitoring.yaml)" -ge 3
 
       - name: Install kubeconform
         run: go install github.com/yannh/kubeconform/cmd/kubeconform@${KUBECONFORM_VERSION}

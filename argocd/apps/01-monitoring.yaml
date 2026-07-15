@@ -4,22 +4,30 @@ metadata:
   name: monitoring
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "1"    # 波次:数字小先部署。监控必须先于业务
+    argocd.argoproj.io/sync-wave: "1"
 spec:
   project: default
   sources:
     - repoURL: https://prometheus-community.github.io/helm-charts
       chart: kube-prometheus-stack
-      targetRevision: "72.6.2"           # TODO(你来改): 查当前最新稳定版并固定
+      targetRevision: "87.16.1"
       helm:
-        valueFiles: [$values/deploy/monitoring/values.yaml]
-    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
+        valueFiles:
+          - $values/deploy/monitoring/values.yaml
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git
       targetRevision: main
       ref: values
-    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git
       targetRevision: main
       path: deploy/monitoring/servicemonitors
-  destination: {server: https://kubernetes.default.svc, namespace: monitoring}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: monitoring
   syncPolicy:
-    automated: {prune: true, selfHeal: true}
-    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    automated:
+      enabled: false
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
