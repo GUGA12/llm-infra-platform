@@ -1,22 +1,32 @@
-# [扩缩容层|B类] KEDA: 按推理排队深度伸缩vLLM
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
-metadata: {name: vllm-scaler, namespace: inference}
+metadata:
+  name: vllm-scaler
+  namespace: inference
+  annotations:
+    llm-infra/capacity-note: "Single L20 GPU: raise maxReplicaCount only after adding GPU capacity or supported sharing"
 spec:
   scaleTargetRef:
-    name: vllm-mock                   # TODO(验证): kubectl get deploy -n inference 抄真名
-  minReplicaCount: 1          # 为什么vLLM一般不scale-to-zero?(冷启动代价)
-  maxReplicaCount: 2          # 依据: 你有几张卡/是否开time-slicing
-  cooldownPeriod: 300           # 为什么要比无状态服务长?
+    apiVersion: apps/v1
+    kind: Deployment
+    name: inference-qwen25-1-5b-deployment-vllm
+  pollingInterval: 15
+  cooldownPeriod: 300
+  minReplicaCount: 1
+  maxReplicaCount: 1
   triggers:
     - type: prometheus
       metadata:
-        serverAddress: http://kube-prometheus-stack-prometheus.monitoring.svc:9090   # TODO(验证): prometheus svc真名
+        serverAddress: http://monitoring-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
         query: sum(vllm:num_requests_waiting)
-        threshold: "5"         # 压测得出单副本安全并发后回填; 先拍一个并写推理
+        threshold: "5"
+        ignoreNullValues: "false"
   advanced:
     horizontalPodAutoscalerConfig:
       behavior:
         scaleDown:
           stabilizationWindowSeconds: 600
-          policies: [{type: Pods, value: 1, periodSeconds: 60}]  # 限速缩容防抖动
+          policies:
+            - type: Pods
+              value: 1
+              periodSeconds: 60
