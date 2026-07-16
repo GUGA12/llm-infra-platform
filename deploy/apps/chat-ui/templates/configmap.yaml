@@ -1,0 +1,162 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}
+  labels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+data:
+  index.html: |
+    <!doctype html>
+    <html lang="zh-CN">
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1">
+      <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src 'self'; img-src 'self' data:; style-src 'unsafe-inline'; script-src 'unsafe-inline'">
+      <title>GPU AI Chat</title>
+      <style>
+        :root { color-scheme: dark; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+        * { box-sizing: border-box; }
+        body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top, #172554 0, #070b18 45%, #030712 100%); color: #e5e7eb; }
+        .shell { width: min(100%, 980px); min-height: 100vh; margin: auto; display: grid; grid-template-rows: auto auto 1fr auto; padding: 20px; gap: 14px; }
+        header { display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+        h1 { margin: 0; font-size: clamp(22px, 4vw, 32px); }
+        .sub { color: #94a3b8; font-size: 13px; margin-top: 5px; }
+        .badge { border: 1px solid #334155; border-radius: 999px; padding: 7px 11px; color: #fbbf24; background: #111827cc; font-size: 12px; white-space: nowrap; }
+        .keybar, .composer { display: grid; grid-template-columns: 1fr auto; gap: 10px; padding: 12px; border: 1px solid #263248; border-radius: 16px; background: #0f172acc; backdrop-filter: blur(14px); }
+        input, textarea, button { font: inherit; }
+        input, textarea { width: 100%; border: 1px solid #334155; border-radius: 11px; color: #f8fafc; background: #020617; padding: 12px 14px; outline: none; }
+        input:focus, textarea:focus { border-color: #60a5fa; box-shadow: 0 0 0 3px #2563eb33; }
+        button { border: 0; border-radius: 11px; padding: 0 18px; background: linear-gradient(135deg, #2563eb, #7c3aed); color: white; font-weight: 700; cursor: pointer; }
+        button:disabled { opacity: .45; cursor: not-allowed; }
+        #messages { overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding: 8px 2px 20px; min-height: 360px; }
+        .empty { margin: auto; text-align: center; color: #94a3b8; line-height: 1.8; }
+        .bubble { max-width: 82%; padding: 13px 15px; border-radius: 16px; line-height: 1.65; white-space: pre-wrap; overflow-wrap: anywhere; box-shadow: 0 10px 30px #0003; }
+        .user { align-self: flex-end; background: linear-gradient(135deg, #1d4ed8, #6d28d9); border-bottom-right-radius: 5px; }
+        .assistant { align-self: flex-start; background: #111827; border: 1px solid #273449; border-bottom-left-radius: 5px; }
+        .error { align-self: center; max-width: 100%; color: #fecaca; background: #7f1d1d66; border: 1px solid #ef444466; }
+        .composer { grid-template-columns: 1fr auto; position: sticky; bottom: 16px; }
+        textarea { min-height: 54px; max-height: 180px; resize: vertical; }
+        .hint { grid-column: 1 / -1; display: flex; justify-content: space-between; color: #64748b; font-size: 11px; }
+        .linkbtn { background: transparent; color: #93c5fd; padding: 0; font-weight: 500; }
+        @media (max-width: 640px) {
+          .shell { padding: 12px; }
+          header { align-items: flex-start; }
+          .keybar { grid-template-columns: 1fr; }
+          .keybar button { min-height: 44px; }
+          .bubble { max-width: 92%; }
+          .composer button { padding: 0 14px; }
+        }
+      </style>
+    </head>
+    <body>
+      <main class="shell">
+        <header>
+          <div><h1>GPU AI Chat</h1><div class="sub">Qwen2.5 · NVIDIA L20 · Kubernetes</div></div>
+          <div id="keyState" class="badge">API Key 未设置</div>
+        </header>
+        <section class="keybar">
+          <input id="apiKey" type="password" autocomplete="off" placeholder="粘贴 x-api-key（仅保存在当前页面内存）">
+          <button id="saveKey" type="button">启用会话</button>
+        </section>
+        <section id="messages" aria-live="polite">
+          <div id="empty" class="empty">输入 API Key 后即可提问。<br>Shift + Enter 换行，Enter 发送。</div>
+        </section>
+        <section class="composer">
+          <textarea id="prompt" placeholder="输入你的问题……" disabled></textarea>
+          <button id="send" type="button" disabled>发送</button>
+          <div class="hint"><span>请求通过 HTTPS 网关和 API Key 鉴权</span><button id="clear" class="linkbtn" type="button">清空对话</button></div>
+        </section>
+      </main>
+      <script>
+        (() => {
+          let apiKey = "";
+          let history = [];
+          let sending = false;
+          const keyInput = document.querySelector("#apiKey");
+          const keyState = document.querySelector("#keyState");
+          const prompt = document.querySelector("#prompt");
+          const sendButton = document.querySelector("#send");
+          const messages = document.querySelector("#messages");
+
+          function addBubble(role, text) {
+            document.querySelector("#empty")?.remove();
+            const bubble = document.createElement("div");
+            bubble.className = `bubble ${role}`;
+            bubble.textContent = text;
+            messages.appendChild(bubble);
+            messages.scrollTop = messages.scrollHeight;
+          }
+
+          function updateControls() {
+            const ready = Boolean(apiKey);
+            prompt.disabled = !ready || sending;
+            sendButton.disabled = !ready || sending || !prompt.value.trim();
+            sendButton.textContent = sending ? "生成中…" : "发送";
+          }
+
+          document.querySelector("#saveKey").addEventListener("click", () => {
+            const nextKey = keyInput.value.trim();
+            if (!nextKey) return;
+            apiKey = nextKey;
+            keyInput.value = "";
+            keyState.textContent = "API Key 已启用";
+            keyState.style.color = "#86efac";
+            updateControls();
+            prompt.focus();
+          });
+
+          keyInput.addEventListener("keydown", event => {
+            if (event.key === "Enter") document.querySelector("#saveKey").click();
+          });
+
+          prompt.addEventListener("input", updateControls);
+          prompt.addEventListener("keydown", event => {
+            if (event.key === "Enter" && !event.shiftKey) {
+              event.preventDefault();
+              if (!sendButton.disabled) sendButton.click();
+            }
+          });
+
+          sendButton.addEventListener("click", async () => {
+            const question = prompt.value.trim();
+            if (!question || !apiKey || sending) return;
+            history.push({ role: "user", content: question });
+            addBubble("user", question);
+            prompt.value = "";
+            sending = true;
+            updateControls();
+            try {
+              const response = await fetch("/v1/chat", {
+                method: "POST",
+                headers: { "content-type": "application/json", "x-api-key": apiKey },
+                body: JSON.stringify({ messages: history, max_tokens: 512 })
+              });
+              if (response.status === 401) throw new Error("API Key 无效，请重新输入。");
+              const data = await response.json();
+              if (!response.ok || data.error) throw new Error(data.error?.message || `请求失败（HTTP ${response.status}）`);
+              const answer = data.choices?.[0]?.message?.content;
+              if (!answer) throw new Error("模型没有返回可显示的内容。");
+              history.push({ role: "assistant", content: answer });
+              addBubble("assistant", answer);
+            } catch (error) {
+              addBubble("error", error.message || "请求失败，请稍后重试。");
+            } finally {
+              sending = false;
+              updateControls();
+              prompt.focus();
+            }
+          });
+
+          document.querySelector("#clear").addEventListener("click", () => {
+            history = [];
+            messages.replaceChildren();
+            const empty = document.createElement("div");
+            empty.id = "empty";
+            empty.className = "empty";
+            empty.textContent = "对话已清空，可以开始新问题。";
+            messages.appendChild(empty);
+          });
+        })();
+      </script>
+    </body>
+    </html>

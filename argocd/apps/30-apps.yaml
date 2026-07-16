@@ -7,12 +7,17 @@ metadata:
 spec:
   project: default
   sources:
-    # 自研 chat-api: chart 在本仓库
-    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
+    # Self-developed chat API chart in this repository.
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git
       targetRevision: main
       path: deploy/apps/chat-api
       helm: {releaseName: chat-api}
-    # Dify: 社区 Helm chart。TODO(你来改): 选定 chart 来源(如 borispolonsky/dify-helm)后填 repoURL/chart/版本
+    # Browser UI for the chat API; no API key is embedded in this chart.
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git
+      targetRevision: main
+      path: deploy/apps/chat-ui
+      helm: {releaseName: chat-ui}
+    # Dify placeholder: select and pin a community chart before enabling it.
     # - repoURL: TODO
     #   chart: dify
     #   targetRevision: TODO
