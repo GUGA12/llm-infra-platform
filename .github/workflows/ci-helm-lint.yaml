@@ -57,6 +57,8 @@ jobs:
         run: |
           helm repo add grafana https://grafana.github.io/helm-charts
           helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm repo add milvus https://zilliztech.github.io/milvus-helm/
           helm repo update
 
       - name: Render Helm charts
@@ -80,10 +82,28 @@ jobs:
             --namespace monitoring \
             -f deploy/monitoring/values.yaml \
             > /tmp/rendered/monitoring.yaml
+          helm template data bitnami/postgresql \
+            --version 18.7.13 \
+            --namespace data \
+            -f deploy/data/postgresql-values.yaml \
+            > /tmp/rendered/postgresql.yaml
+          helm template data bitnami/redis \
+            --version 27.0.15 \
+            --namespace data \
+            -f deploy/data/redis-values.yaml \
+            > /tmp/rendered/redis.yaml
+          helm template data milvus/milvus \
+            --version 5.0.24 \
+            --namespace data \
+            -f deploy/data/milvus-values.yaml \
+            > /tmp/rendered/milvus.yaml
           test -s /tmp/rendered/chat-api.yaml
           test -s /tmp/rendered/loki.yaml
           test -s /tmp/rendered/alloy.yaml
           test -s /tmp/rendered/monitoring.yaml
+          test -s /tmp/rendered/postgresql.yaml
+          test -s /tmp/rendered/redis.yaml
+          test -s /tmp/rendered/milvus.yaml
 
       - name: Verify important rendered values
         run: |
@@ -92,6 +112,13 @@ jobs:
           grep -q 'logging-loki-gateway.logging.svc:80' /tmp/rendered/alloy.yaml
           grep -q 'name: monitoring-grafana-admin' /tmp/rendered/monitoring.yaml
           test "$(grep -c 'storageClassName: local-path' /tmp/rendered/monitoring.yaml)" -ge 3
+          grep -q 'db2312d9b243afa8c3b3f5496e478d17d0dff9791d06f3b93b9567abd86ae92f' /tmp/rendered/postgresql.yaml
+          grep -q '341edafd5622a1e47e4b3ab379913de84ea4a50d534f40aaa903a3825e0e1cf1' /tmp/rendered/redis.yaml
+          test "$(grep -Ec 'storageClassName: "?local-path"?' /tmp/rendered/milvus.yaml)" -ge 3
+          if grep -q 'apachepulsar' /tmp/rendered/milvus.yaml; then
+            echo "Pulsar must stay disabled in the single-node Milvus profile"
+            exit 1
+          fi
 
       - name: Validate rendered Alertmanager config
         run: |

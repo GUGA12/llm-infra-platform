@@ -3,27 +3,40 @@ kind: Application
 metadata:
   name: data
   namespace: argocd
-  annotations: {argocd.argoproj.io/sync-wave: "10"}
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
 spec:
   project: default
   sources:
     - repoURL: registry-1.docker.io/bitnamicharts
       chart: postgresql
-      targetRevision: "16.4.5"         # TODO(你来改)
-      helm: {valueFiles: [$values/deploy/data/postgresql-values.yaml]}
+      targetRevision: "18.7.13"
+      helm:
+        valueFiles:
+          - $values/deploy/data/postgresql-values.yaml
     - repoURL: registry-1.docker.io/bitnamicharts
       chart: redis
-      targetRevision: "20.6.1"         # TODO(你来改)
-      helm: {valueFiles: [$values/deploy/data/redis-values.yaml]}
-    # Milvus 资源较重,预算紧张可注释掉,改用 postgresql + pgvector 扩展
+      targetRevision: "27.0.15"
+      helm:
+        valueFiles:
+          - $values/deploy/data/redis-values.yaml
     - repoURL: https://zilliztech.github.io/milvus-helm
       chart: milvus
-      targetRevision: "4.2.30"         # TODO(你来改)
-      helm: {valueFiles: [$values/deploy/data/milvus-values.yaml]}
-    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
+      targetRevision: "5.0.24"
+      helm:
+        valueFiles:
+          - $values/deploy/data/milvus-values.yaml
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git
       targetRevision: main
       ref: values
-  destination: {server: https://kubernetes.default.svc, namespace: data}
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: data
   syncPolicy:
-    automated: {prune: true, selfHeal: true}
-    syncOptions: [CreateNamespace=true]
+    automated:
+      enabled: false
+      prune: false
+      selfHeal: false
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true

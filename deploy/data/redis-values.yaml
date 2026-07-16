@@ -1,8 +1,24 @@
-# [数据层|A类] Redis: 会话缓存 + (阶段5)网关全局限流计数器
-architecture: replication               # standalone/replication; 学习环境选哪个?限流计数器丢了会怎样?
+image:
+  digest: sha256:341edafd5622a1e47e4b3ab379913de84ea4a50d534f40aaa903a3825e0e1cf1
+
+architecture: standalone
+
 auth:
-  enabled: true                  # 关=省事,开=多一步Secret; 写下你的取舍
+  enabled: true
+  existingSecret: data-redis-auth
+  existingSecretPasswordKey: redis-password
+
 master:
-  persistence: {size: 4Gi}
+  persistence:
+    enabled: true
+    storageClass: local-path
+    size: 2Gi
   resources:
-    requests: {cpu: 500m, memory: 1Gi}
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+metrics:
+  enabled: false
