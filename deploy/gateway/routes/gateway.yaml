@@ -1,23 +1,17 @@
-# [网关层|B类] 集群流量总入口
 apiVersion: gateway.networking.k8s.io/v1
 kind: Gateway
-metadata: {name: llm-gw, namespace: gateway}
+metadata:
+  name: llm-gw
+  namespace: gateway
 spec:
-  gatewayClassName: __TODO__         # TODO(验证): 装完Envoy Gateway后 kubectl get gatewayclass
+  gatewayClassName: eg
   listeners:
     - name: http
       port: 80
       protocol: HTTP
       allowedRoutes:
         namespaces:
-          from: Selector             # All/Same/Selector; 生产为什么少用All? 你选哪个并说明
-    # ---- 阶段5启用HTTPS ----
-    # - name: https
-    #   port: 443
-    #   protocol: HTTPS
-    #   tls:
-    #     mode: Terminate
-    #     certificateRefs:
-    #       - name: __TODO__         # cert-manager签发的Secret名
-    #   allowedRoutes:
-    #     namespaces: {from: __TODO__}
+          from: Selector
+          selector:
+            matchLabels:
+              llm-infra/gateway-access: "true"
