@@ -10,7 +10,7 @@ spec:
   sources:
     - repoURL: https://vllm-project.github.io/production-stack
       chart: vllm-stack
-      targetRevision: "*"                # TODO(你来改): 固定版本号,理由写在 PR 里
+      targetRevision: "0.1.11"                # TODO(你来改): 固定版本号,理由写在 PR 里
       helm:
         valueFiles: [$values/deploy/inference/values.yaml]
     - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
@@ -18,5 +18,5 @@ spec:
       ref: values
   destination: {server: https://kubernetes.default.svc, namespace: inference}
   syncPolicy:
-    automated: {prune: true, selfHeal: true}
-    syncOptions: [CreateNamespace=true]
+    automated: {enabled: false, prune: false, selfHeal: false}
+    syncOptions: [CreateNamespace=true,ServerSideApply=true]

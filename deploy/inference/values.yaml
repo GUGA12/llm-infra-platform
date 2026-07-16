@@ -1,31 +1,78 @@
-# [推理层|A类] vLLM production-stack
-# 先小模型打通(第一块), 再切7B(第二块)。切换=注释开关,两块都要填
 servingEngineSpec:
-  runtimeClassName: ""       # ""还是"nvidia"? 用 kubectl get runtimeclass 判断; kind里填什么?
+  enableEngine: true
+  runtimeClassName: nvidia
+
+  labels:
+    environment: inference
+    release: inference
+
+  serviceMonitor:
+    enabled: true
+
   modelSpec:
-    - name: "opt125m"
-      repository: "vllm/vllm-openai"
-      tag: v0.8.5                  # 固定版本! 去该镜像tags页选当前稳定版, 记录选择理由
-      modelURL: "facebook/opt-125m"
+    - name: qwen25-1-5b
+      enabled: true
+      runtimeClassName: nvidia
+
+      repository: vllm/vllm-openai
+      tag: v0.23.0
+      imagePullPolicy: IfNotPresent
+
+      modelURL: Qwen/Qwen2.5-1.5B-Instruct
       replicaCount: 1
-      requestCPU: "1"
-      requestMemory: "4Gi"
+
+      requestCPU: 2
+      requestMemory: 8Gi
+      limitCPU: 4
+      limitMemory: 16Gi
+
       requestGPU: 1
-      pvcStorage: "10Gi"           # 权重缓存; opt-125m很小, 但PVC还要装什么?(HF缓存结构)
-    # ---- 7B 块(打通后启用) ----
-    # - name: "qwen25-7b"
-    #   repository: "vllm/vllm-openai"
-    #   tag: __TODO__                # 与上面同版本
-    #   modelURL: __TODO__           # 选AWQ量化版还是原版? 依据: 你的显存是多少
-    #   replicaCount: 1
-    #   requestCPU: __TODO__
-    #   requestMemory: __TODO__      # 依据: 权重加载时的宿主内存峰值, 不是显存
-    #   requestGPU: 1
-    #   pvcStorage: __TODO__         # 依据: 模型文件大小x余量
-    #   vllmConfig:
-    #     gpuMemoryUtilization: __TODO__   # 0.9~0.95; 调0.99会怎样(演练#1)
-    #     maxModelLen: __TODO__            # 上下文越长KV cache越吃显存, 和并发怎么权衡?
+      requestGPUType: nvidia.com/gpu
+
+      pvcStorage: 20Gi
+      storageClass: local-path
+      shmSize: 8Gi
+
+      enableLoRA: false
+
+      lmcacheConfig:
+        enabled: false
+
+      keda:
+        enabled: false
+
+      vllmConfig:
+        enablePrefixCaching: true
+        enableChunkedPrefill: true
+        maxModelLen: 8192
+        dtype: bfloat16
+        tensorParallelSize: 1
+        maxNumSeqs: 32
+        gpuMemoryUtilization: 0.80
+        runner: auto
+        extraArgs: []
+
 routerSpec:
-  enabled: true
+  enableRouter: true
+  repository: lmcache/lmstack-router
+  tag: v0.1.11
+  imagePullPolicy: IfNotPresent
+
+  replicaCount: 1
+  serviceType: ClusterIP
+  servicePort: 80
+  serviceDiscovery: k8s
+  k8sServiceDiscoveryType: pod-ip
+  routingLogic: roundrobin
+
   resources:
-    requests: {cpu: "1", memory: "1Gi"}
+    requests:
+      cpu: 500m
+      memory: 512Mi
+    limits:
+      cpu: 2
+      memory: 2Gi
+
+  serviceMonitor:
+    enabled: true
+    interval: 15s
