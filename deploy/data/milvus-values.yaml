@@ -1,9 +1,61 @@
-# [数据层|A类] Milvus standalone(资源紧张可整体不装,改用pgvector,在30-apps里同步注释)
-mode: standalone
-cluster: {enabled: false}
-etcd: {replicaCount: 1}
-minio: {mode: standalone}
+cluster:
+  enabled: false
+
+image:
+  all:
+    repository: milvusdb/milvus
+    tag: v2.6.20
+    pullPolicy: IfNotPresent
+
 standalone:
-  persistence: {persistentVolumeClaim: {size: 20Gi}}
+  replicas: 1
+  messageQueue: woodpecker
   resources:
-    requests: {cpu: 1, memory: 2Gi}   # Milvus吃内存,笔记本上给多少?给不起怎么办?
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      memory: 3Gi
+  persistence:
+    enabled: true
+    persistentVolumeClaim:
+      storageClass: local-path
+      accessModes: ReadWriteOnce
+      size: 8Gi
+
+pulsarv3:
+  enabled: false
+pulsar:
+  enabled: false
+kafka:
+  enabled: false
+woodpecker:
+  enabled: false
+
+etcd:
+  enabled: true
+  replicaCount: 1
+  persistence:
+    enabled: true
+    storageClass: local-path
+    size: 2Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 256Mi
+    limits:
+      memory: 512Mi
+
+minio:
+  enabled: true
+  mode: standalone
+  persistence:
+    enabled: true
+    storageClass: local-path
+    size: 8Gi
+  resources:
+    requests:
+      cpu: 100m
+      memory: 512Mi
+    limits:
+      memory: 1Gi

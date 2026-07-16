@@ -1,11 +1,28 @@
-# [数据层|A类] PostgreSQL (bitnami)
+image:
+  digest: sha256:db2312d9b243afa8c3b3f5496e478d17d0dff9791d06f3b93b9567abd86ae92f
+
+architecture: standalone
+
 auth:
   database: chatdb
   username: chat
-  password: 123456                 # 阶段7换existingSecret; 先跑通并在此注明技术债
+  existingSecret: data-postgresql-auth
+  secretKeys:
+    adminPasswordKey: postgres-password
+    userPasswordKey: password
+    replicationPasswordKey: replication-password
+
 primary:
-  persistence: {size: 8Gi}      # 依据: 审计日志增长估算, 学习环境8Gi够
+  persistence:
+    enabled: true
+    storageClass: local-path
+    size: 5Gi
   resources:
-    requests: {cpu: 500m, memory: 1G}
-# 走pgvector省Milvus: image.repository=pgvector/pgvector, tag=pg16
-# 并加 primary.initdb.scripts 执行 CREATE EXTENSION vector;
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+
+metrics:
+  enabled: false
