@@ -3,23 +3,32 @@ kind: Application
 metadata:
   name: gateway
   namespace: argocd
-  annotations: {argocd.argoproj.io/sync-wave: "40"}
+  annotations:
+    argocd.argoproj.io/sync-wave: "40"
 spec:
   project: default
   sources:
     - repoURL: docker.io/envoyproxy
       chart: gateway-helm
-      targetRevision: "v1.4.0"         # TODO(你来改): Envoy Gateway 版本
-      helm: {releaseName: eg}
-    - repoURL: docker.io/envoyproxy
-      chart: ai-gateway-helm
-      targetRevision: "v0.2.0"         # TODO(你来改): Envoy AI Gateway 迭代快,读 release notes
-      helm: {releaseName: aieg}
-    # 路由/策略等自写 CR 也由 Argo 管
-    - repoURL: https://github.com/GUGA12/llm-infra-platform.git   # TODO(你来改)
+      targetRevision: "v1.8.2"
+      helm:
+        releaseName: eg
+    - repoURL: https://github.com/GUGA12/llm-infra-platform.git
       targetRevision: main
       path: deploy/gateway/routes
-  destination: {server: https://kubernetes.default.svc, namespace: gateway}
+      directory:
+        recurse: true
+        # These require Envoy AI Gateway and production credentials. Keep them
+        # outside the first standard HTTP Gateway rollout.
+        exclude: '{aigatewayroute.yaml,backendtrafficpolicy-ratelimit.yaml,referencegrant.yaml,secret-api-keys.example.yaml,securitypolicy.yaml}'
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: gateway
   syncPolicy:
-    automated: {prune: true, selfHeal: true}
-    syncOptions: [CreateNamespace=true, ServerSideApply=true]
+    automated:
+      enabled: true
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
