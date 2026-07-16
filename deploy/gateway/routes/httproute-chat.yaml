@@ -9,8 +9,6 @@ spec:
       kind: Gateway
       name: llm-gw
       namespace: gateway
-  hostnames:
-    - chat.lab.local
   rules:
     - matches:
         - path:

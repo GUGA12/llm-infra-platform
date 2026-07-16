@@ -18,9 +18,9 @@ spec:
       path: deploy/gateway/routes
       directory:
         recurse: true
-        # These require Envoy AI Gateway and production credentials. Keep them
-        # outside the first standard HTTP Gateway rollout.
-        exclude: '{aigatewayroute.yaml,backendtrafficpolicy-ratelimit.yaml,referencegrant.yaml,secret-api-keys.example.yaml,securitypolicy.yaml}'
+        # These require Envoy AI Gateway or production credentials. Keep them
+        # outside the standard HTTP Gateway rollout.
+        exclude: '{aigatewayroute.yaml,backendtrafficpolicy-ratelimit.yaml,referencegrant.yaml,secret-api-keys.example.yaml}'
   destination:
     server: https://kubernetes.default.svc
     namespace: gateway

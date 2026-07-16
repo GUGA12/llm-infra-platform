@@ -1,0 +1,20 @@
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: llm-gw-selfsigned
+  namespace: gateway
+spec:
+  secretName: llm-gw-selfsigned-tls
+  duration: 2160h
+  renewBefore: 360h
+  privateKey:
+    algorithm: ECDSA
+    size: 256
+  usages:
+    - server auth
+  ipAddresses:
+    - 8.216.53.1
+  issuerRef:
+    name: llm-gw-selfsigned
+    kind: Issuer
+    group: cert-manager.io

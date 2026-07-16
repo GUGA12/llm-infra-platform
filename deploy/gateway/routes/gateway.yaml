@@ -9,11 +9,17 @@ spec:
     parametersRef:
       group: gateway.envoyproxy.io
       kind: EnvoyProxy
-      name: internal-proxy
+      name: public-nodeport-proxy
   listeners:
-    - name: http
-      port: 80
-      protocol: HTTP
+    - name: https
+      port: 443
+      protocol: HTTPS
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - group: ""
+            kind: Secret
+            name: llm-gw-selfsigned-tls
       allowedRoutes:
         namespaces:
           from: Selector
