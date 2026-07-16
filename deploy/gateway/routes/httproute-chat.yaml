@@ -21,3 +21,4 @@ spec:
           kind: Service
           name: chat-api
           port: 80
+          weight: 1
