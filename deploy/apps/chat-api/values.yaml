@@ -7,12 +7,10 @@ resources:
   requests: {cpu: 200m, memory: 256Mi}
   limits: {cpu: 1, memory: 1Gi}
 env:
-  VLLM_BASE_URL: http://vllm-router-service.inference/v1
-  MODEL_NAME: mock-model
-  REDIS_URL: redis://redis-master.data.svc.cluster.local:6379/0
-  PG_DSN: postgresql://chat:123456@pg-postgresql.data.svc.cluster.local:5432/chatdb
+  VLLM_BASE_URL: http://inference-router-service.inference.svc.cluster.local/v1
+  MODEL_NAME: Qwen/Qwen2.5-1.5B-Instruct
 hpa:
-  enabled: true
+  enabled: false
   minReplicas: 1
   maxReplicas: 3
   targetCPU: 70
